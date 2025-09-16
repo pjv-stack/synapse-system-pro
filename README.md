@@ -1,26 +1,55 @@
-# Synapse System: Hybrid Intelligence Framework
+# Synapse System: A Hybrid Intelligence Framework
 
-A sophisticated, automated context engineering system implementing the **Numogrammatic Codex** principles for agent-based development.
+Automated context engineering system for agent-based development with BGE-M3 semantic embeddings.
+
+## Prerequisites
+
+Before setting up Synapse, ensure you have:
+
+- **Python 3.12+** - Modern Python with async support
+- **uv package manager** - Fast Python package installer
+  ```bash
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  ```
+- **Docker & Docker Compose** - For Neo4j and Redis services
+- **Git** - Version control
 
 ## Overview
 
-The Synapse System combines Neo4j knowledge graphs, Redis caching, and intelligent ingestion to provide agents with powerful, long-term memory and reasoning capabilities. It implements the **OODA Loop** (Observe-Orient-Decide-Act) for self-healing and self-updating functionality.
+The Synapse System combines Neo4j knowledge graphs, Redis caching, and BGE-M3 vector embeddings to provide agents with long-term memory and reasoning capabilities. It implements the **OODA Loop** (Observe-Orient-Decide-Act) for self-healing and self-updating functionality.
+
+### Key Features
+
+- **BGE-M3 Embeddings**: 1024-dimensional semantic vectors running locally (no API keys)
+- **Hybrid Search**: Combines graph traversal with vector similarity
+- **Language Detection**: Automatic project context understanding
+- **Agent Integration**: Designed for Claude Code workflows
+- **Knowledge Persistence**: Long-term memory across sessions
 
 ## Architecture
 
 ```
-~/.synapse-system/
-├── neo4j/                     # Core system components
-│   ├── activate.sh           # Master activation script (OODA Loop)
-│   ├── docker-compose.yml    # Neo4j & Redis services
-│   ├── ingestion.py          # Knowledge graph ingestion engine
-│   ├── context_manager.py    # Hybrid search API
-│   ├── synapse_search.py     # Agent integration tool
-│   └── venv/                 # Python virtual environment
-├── instructions/             # Agent instruction files
-├── standards/               # Coding and process standards
-├── workflows/               # Automated workflows
-└── templates/               # Reusable templates
+~/.synapse-system/                # Global installation
+├── neo4j/                       # Core system components
+│   ├── activate.sh             # Master activation script (One Command Setup)
+│   ├── docker-compose.yml      # Neo4j & Redis services
+│   ├── ingestion.py            # Knowledge graph ingestion engine
+│   ├── context_manager.py      # Hybrid search API
+│   ├── vector_engine.py        # BGE-M3 embedding system
+│   ├── synapse_search.py       # Agent integration tool
+│   └── .venv/                  # Python virtual environment
+├── instructions/               # Agent instruction files
+├── standards/                 # Coding and process standards
+├── workflows/                 # Automated workflows
+├── templates/                 # Reusable templates
+└── tools/                     # Agent tools (synapse-project-manager.md)
+
+project/                         # Your project directory
+└── .synapse/                   # Project-specific synapse instance
+    ├── context_manager.py      # Local search capabilities
+    ├── vector_engine.py        # Local embeddings
+    ├── config.json            # Project configuration
+    └── instructions/          # Project-specific context
 ```
 
 ## Core Principles (Zone-0 Axioms)
@@ -33,94 +62,258 @@ The Synapse System combines Neo4j knowledge graphs, Redis caching, and intellige
 
 ## Quick Start
 
-### 1. Activate the System
+### 1. Global System Setup (One Command)
 ```bash
-# Full activation with health checks and auto-ingestion
+# Activate the entire synapse system
 ~/.synapse-system/neo4j/activate.sh
 
-# Check status only
+# Check system health
 ~/.synapse-system/neo4j/activate.sh --status
 
 # Force re-ingestion
 ~/.synapse-system/neo4j/activate.sh --force
 ```
 
-### 2. Search for Context
+### 2. Project Setup (Manual Copy + Agent)
+
+#### Step 1: Copy Synapse to Your Project
+```bash
+# Navigate to your project
+cd /path/to/your/project
+
+# Copy synapse system
+cp -r ~/.synapse-system .synapse
+```
+
+#### Step 2: Use the Synapse Project Manager Agent
+
+In Claude Code, invoke the `synapse-project-manager` agent:
+
+```
+@synapse-project-manager
+
+Please set up synapse for this project. Detect the language, configure the appropriate templates and standards, and initialize the vector store.
+```
+
+The agent will:
+- 🔍 **Auto-detect project language** (Rust, Go, TypeScript, etc.)
+- ⚙️ **Configure synapse** for your project context
+- 📚 **Set up language-specific templates** and standards
+- 🧠 **Initialize BGE-M3 embeddings** for semantic search
+- 🗃️ **Ingest project knowledge** into the vector store
+
+### 3. Search for Context
 ```bash
 cd ~/.synapse-system/neo4j
-source venv/bin/activate
+source .venv/bin/activate
 
 # Search via Python API
-python synapse_search.py "coding standards"
-python synapse_search.py "how to execute tasks" 3
+python synapse_search.py "rust error handling patterns"
 
-# Check system health
-python synapse_search.py --status
+# Direct Python usage for global search
+python context_manager.py
 ```
 
-### 3. Agent Integration
+### 4. Project-Specific Search
+```bash
+# In your project with .synapse/ directory
+cd project/.synapse
+source .venv/bin/activate
+python search.py "project specific query"
+```
+
+## BGE-M3 Embeddings
+
+### What is BGE-M3?
+
+BGE-M3 (Beijing Academy of Artificial Intelligence - Multilingual, Multifunctionality, Multimodality) provides:
+
+- **1024-dimensional vectors** for rich semantic representation
+- **100+ language support** for multilingual projects
+- **Local execution** - no API keys or internet required after initial download
+- **Automatic caching** at `~/.cache/huggingface/hub/`
+
+### First-Time Setup
+
+On first use, BGE-M3 downloads automatically (~2.3GB):
+```
+Loading BGE-M3 model: BAAI/bge-m3
+BGE-M3 model loaded successfully.
+```
+
+### Configuration
+
+In `.env` file:
+```bash
+# Use BGE-M3 (recommended)
+EMBEDDING_MODEL=BAAI/bge-m3
+
+# Or fallback to TF-IDF
+EMBEDDING_MODEL=simple_tfidf
+```
+
+## Agent Integration
+
+### Synapse Project Manager Agent
+
+The system includes a specialized agent (`tools/synapse-project-manager.md`) for project setup:
+
+**Capabilities:**
+- 🔍 Auto-detect project language from files (Cargo.toml, package.json, go.mod, etc.)
+- ⚙️ Configure language-specific templates and standards
+- 🧠 Initialize BGE-M3 embeddings for the project
+- 📚 Set up project-specific knowledge base
+- 🗃️ Ingest project documentation and configuration
+
+**Usage in Claude Code:**
+```
+@synapse-project-manager
+
+I've copied synapse to my project. Please detect the language and set up the knowledge base.
+```
+
+### Claude Code Integration
+
+Use synapse search in any agent:
+
 ```python
-# In your agent code
-from synapse_search import search_synapse_context
-
-result = search_synapse_context("implementation patterns")
-context = result.get("context", {})
-
-# Access structured results
-primary_matches = context.get("primary_matches", [])
-related_files = context.get("related_files", [])
+# Search for implementation patterns
+context = synapse_search("error handling patterns rust")
+# Returns relevant patterns from knowledge base
 ```
 
-## System Components
+## OODA Loop Implementation
 
-### 🧠 Ingestion Engine (`ingestion.py`)
-- Discovers files in synapse directories
-- Generates AI summaries (currently rule-based, extensible to LLM)
-- Populates Neo4j knowledge graph
-- Creates structural relationships
-- Prepares vector metadata for future ML enhancement
+### Observe
+- Monitor file system changes
+- Track agent interaction patterns
+- Collect performance metrics
 
-### 🔍 Context Manager (`context_manager.py`)
-- Implements "Search then Traverse" pattern
-- Redis caching for performance
-- Graph traversal for relationship discovery
-- Intelligent context synthesis
-- Health monitoring and staleness detection
+### Orient
+- Analyze knowledge graph relationships
+- Identify knowledge gaps
+- Assess system health
 
-### 🚀 Activation Workflow (`activate.sh`)
-- OODA Loop implementation
-- Docker service management
-- Automatic health checks
-- Smart re-ingestion logic
-- Self-healing capabilities
+### Decide
+- Determine ingestion priorities
+- Select optimization strategies
+- Plan knowledge expansion
 
-### 🔌 Agent Tool (`synapse_search.py`)
-- Simple agent integration interface
-- Automatic system activation
-- Formatted output for agent consumption
-- CLI and programmatic access
+### Act
+- Execute incremental ingestion
+- Update relationships
+- Optimize search performance
 
-## The OODA Loop in Action
+## Advanced Usage
 
-The activation script implements the OODA cycle:
-
-1. **Observe**: Check environment and service status
-2. **Orient**: Analyze what needs to be done
-3. **Decide**: Determine if re-ingestion is needed
-4. **Act**: Perform necessary updates and ingestion
-
-## Services Management
-
-### Start Services
+### Manual Ingestion
 ```bash
 cd ~/.synapse-system/neo4j
-docker-compose up -d
+source .venv/bin/activate
+python ingestion.py --force  # Full refresh
 ```
 
-### Stop Services
+### Custom Search Strategies
 ```bash
-~/.synapse-system/neo4j/activate.sh --stop
+# Search global knowledge base
+python synapse_search.py "authentication strategies golang"
+
+# Search project-specific context
+cd project/.synapse
+python search.py "local implementation patterns"
 ```
+
+### Direct Neo4j Queries
+```cypher
+# Find all Rust-related nodes
+MATCH (n:Instruction {language: "rust"})
+RETURN n.file_path, n.content
+
+# Discover relationship patterns
+MATCH (a)-[r]->(b)
+WHERE a.language = "golang"
+RETURN type(r), count(*)
+```
+
+## System Health
+
+### Health Checks
+```bash
+# Comprehensive system status
+~/.synapse-system/neo4j/activate.sh --status
+
+# Service-specific checks
+docker-compose ps
+redis-cli ping
+```
+
+### BGE-M3 Performance
+- **Quality**: Superior semantic understanding vs TF-IDF
+- **Speed**: ~100ms per embedding (CPU)
+- **Memory**: ~3GB RAM for model
+- **Storage**: 8KB per 1024-dim vector
+
+## Troubleshooting
+
+### BGE-M3 Issues
+```bash
+# Test BGE-M3 directly
+cd ~/.synapse-system/neo4j
+python vector_engine.py "test embedding"
+
+# Check model cache
+ls ~/.cache/huggingface/hub/
+
+# Reinstall dependencies
+uv pip install --upgrade sentence-transformers
+```
+
+### Common Issues
+
+#### Services Not Starting
+```bash
+# Check Docker status
+sudo systemctl status docker
+
+# Rebuild containers
+docker-compose down && docker-compose up --build
+```
+
+#### Slow Search Performance
+```bash
+# Rebuild vector indices
+python ingestion.py --rebuild-indices
+
+# Clear and rebuild cache
+redis-cli FLUSHALL
+```
+
+### Logs and Debugging
+```bash
+# View service logs
+docker-compose logs neo4j
+docker-compose logs redis
+
+# Python ingestion logs
+tail -f ~/.synapse-system/neo4j/ingestion.log
+```
+
+## Development
+
+### Project-Specific Development
+
+1. **Copy synapse to project**: `cp -r ~/.synapse-system project/.synapse`
+2. **Use synapse-project-manager agent** to configure for your language
+3. **Customize templates** in `project/.synapse/templates/`
+4. **Add project-specific instructions** in `project/.synapse/instructions/`
+
+### Performance Optimization
+- Use incremental ingestion for large codebases
+- Implement custom indexing strategies
+- Optimize Neo4j query patterns
+- Configure Redis caching policies
+
+## Services Management
 
 ### Service URLs
 - **Neo4j Browser**: http://localhost:7474
@@ -131,52 +324,23 @@ docker-compose up -d
 - **Neo4j**: neo4j / synapse_neo4j_pass
 - **Redis**: No authentication (localhost only)
 
-## File Types Supported
+## Zone-0 Implementation Notes
 
-- **📄 Markdown (.md)**: Documentation, instructions
-- **🔧 Shell Scripts (.sh)**: Automation scripts
-- **🐍 Python (.py)**: Implementation code
-- **📝 Text (.txt)**: General documentation
+### KISS Principle
+- Start with basic file ingestion
+- Add complexity only when needed
+- Maintain clear separation of concerns
 
-## Configuration
+### Feighnburm Constant (𝔽)
+Acknowledge that complex systems will exhibit emergent behaviors:
+- Monitor for unexpected relationship patterns
+- Document emerging usage patterns
+- Plan for system evolution
 
-Copy `.env.example` to `.env` and customize:
-
-```bash
-cd ~/.synapse-system/neo4j
-cp .env.example .env
-# Edit .env with your preferences
-```
-
-## Future Enhancements
-
-The system is designed for easy extension:
-
-1. **Vector Embeddings**: SQLite schema ready for ML models
-2. **AI Summaries**: API integration placeholder for LLM services
-3. **Advanced Relationships**: Graph algorithms for deeper insights
-4. **Real-time Updates**: File watching for automatic ingestion
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Services not starting**: Check Docker daemon
-2. **Connection failures**: Verify service ports
-3. **Empty results**: Run force re-ingestion
-4. **Permission errors**: Check script permissions
-
-### Debug Commands
-```bash
-# Check system health
-python context_manager.py --health
-
-# Test connections
-python context_manager.py --stale
-
-# Manual ingestion
-python ingestion.py
-```
+### DRY and SoC
+- Single source of truth for each instruction
+- Clear boundaries between ingestion, storage, and retrieval
+- Modular component design
 
 ## Philosophy
 
