@@ -30,11 +30,16 @@ class VectorEngine:
         self.synapse_root = synapse_root or Path.home() / ".synapse-system"
         self.sqlite_path = self.synapse_root / "neo4j" / "vector_store.db"
         self.embedding_model = os.getenv("EMBEDDING_MODEL", "simple_tfidf")
-        self.embedding_dim = 384  # Compatible with BGE-M3 when we upgrade
+        self.embedding_dim = 1024  # BGE-M3 output dimension
 
         # Simple vocabulary for TF-IDF (placeholder until real embeddings)
         self.vocabulary = {}
         self.idf_scores = {}
+
+        # Initialize transformer model if using BGE-M3
+        self.transformer_model = None
+        if self.embedding_model.startswith("BAAI/"):
+            self._initialize_transformer_model()
 
     def initialize_vector_store(self):
         """Initialize the vector storage with proper schema"""
@@ -118,18 +123,50 @@ class VectorEngine:
 
         return tf_vector
 
+    def _initialize_transformer_model(self):
+        """Initialize the sentence-transformers model for BGE-M3"""
+        try:
+            from sentence_transformers import SentenceTransformer
+            print(f"Loading BGE-M3 model: {self.embedding_model}")
+            self.transformer_model = SentenceTransformer(self.embedding_model)
+            print("BGE-M3 model loaded successfully.")
+        except ImportError:
+            print("Error: sentence-transformers not installed. Install with: pip install sentence-transformers")
+            self.transformer_model = None
+        except Exception as e:
+            print(f"Error loading BGE-M3 model: {e}")
+            self.transformer_model = None
+
+    def transformer_embedding(self, text: str) -> np.ndarray:
+        """
+        Generate embedding using BGE-M3 transformer model.
+        """
+        if self.transformer_model is None:
+            print("Transformer model not loaded. Falling back to TF-IDF.")
+            return self.simple_tfidf_embedding(text)
+
+        try:
+            # Generate embedding using BGE-M3
+            embedding = self.transformer_model.encode(text, convert_to_numpy=True)
+
+            # Ensure it's the expected dimension
+            if embedding.shape[0] != self.embedding_dim:
+                print(f"Warning: Expected {self.embedding_dim}D, got {embedding.shape[0]}D")
+
+            return embedding.astype(np.float64)
+        except Exception as e:
+            print(f"Error generating transformer embedding: {e}")
+            return self.simple_tfidf_embedding(text)
+
     def generate_embedding(self, text: str, file_path: str = "") -> np.ndarray:
         """
         Generate embedding for text content.
-        Currently uses simple TF-IDF, will be upgraded to transformers.
+        Uses BGE-M3 transformer model or falls back to TF-IDF.
         """
         if self.embedding_model == "simple_tfidf":
             return self.simple_tfidf_embedding(text)
-
-        # Future: Add sentence-transformers integration here
-        # elif self.embedding_model.startswith("BAAI/"):
-        #     return self.transformer_embedding(text)
-
+        elif self.embedding_model.startswith("BAAI/"):
+            return self.transformer_embedding(text)
         else:
             # Fallback to simple method
             return self.simple_tfidf_embedding(text)
