@@ -84,7 +84,7 @@ project-directory/
 ```bash
 # Initialize Rust project
 cd my-rust-project/
-~/.synapse-system/deploy/init-project.sh --language rust --project .
+~/.synapse-system/synapse init .
 
 # Result: .synapse/ directory with Rust-specific knowledge
 ```
@@ -93,10 +93,12 @@ cd my-rust-project/
 
 ```bash
 # Backend in Rust
-~/.synapse-system/deploy/init-project.sh --language rust --project . --subdir backend
+cd backend/
+~/.synapse-system/synapse init .
 
 # Frontend in TypeScript
-~/.synapse-system/deploy/init-project.sh --language typescript --project . --subdir frontend
+cd ../frontend/
+~/.synapse-system/synapse init .
 
 # Result:
 # backend/.synapse/     (Rust knowledge)
@@ -107,13 +109,16 @@ cd my-rust-project/
 
 ```bash
 # API Gateway in Go
-~/.synapse-system/deploy/init-project.sh --language golang --project . --subdir services/gateway
+cd services/gateway/
+~/.synapse-system/synapse init .
 
 # User Service in Rust
-~/.synapse-system/deploy/init-project.sh --language rust --project . --subdir services/user
+cd ../user/
+~/.synapse-system/synapse init .
 
 # Web UI in TypeScript
-~/.synapse-system/deploy/init-project.sh --language typescript --project . --subdir web
+cd ../../web/
+~/.synapse-system/synapse init .
 ```
 
 ## Claude Code Integration
@@ -179,24 +184,25 @@ Each project synapse includes a `config.json`:
 }
 ```
 
-## Knowledge Synchronization
+## Knowledge Management
 
-### Pull Global Updates
+### Search Global Knowledge
 ```bash
-# Update project with latest global knowledge
-~/.synapse-system/deploy/sync-global.sh pull --project .
+# Search across all knowledge from anywhere
+~/.synapse-system/synapse search "rust error handling patterns"
+~/.synapse-system/synapse search "typescript testing strategies"
 ```
 
-### Contribute to Global
+### Service Management
 ```bash
-# Contribute valuable project patterns back to global
-~/.synapse-system/deploy/sync-global.sh push --project . --dry-run
-```
+# Start synapse services
+~/.synapse-system/synapse start
 
-### Sync Status
-```bash
-# Check synchronization status
-~/.synapse-system/deploy/sync-global.sh status --project .
+# Check system health
+~/.synapse-system/synapse status
+
+# Stop services
+~/.synapse-system/synapse stop
 ```
 
 ## Content Organization
@@ -226,7 +232,7 @@ cargo new my-cli-tool
 cd my-cli-tool
 
 # Add synapse
-~/.synapse-system/deploy/init-project.sh --language rust --project .
+~/.synapse-system/synapse init .
 
 # Agent can now access:
 # - Rust CLI patterns from templates
@@ -245,8 +251,8 @@ web-app/
 └── shared/       # Common utilities
 
 # Initialize each component
-~/.synapse-system/deploy/init-project.sh --language rust --project . --subdir api
-~/.synapse-system/deploy/init-project.sh --language typescript --project . --subdir web
+cd api && ~/.synapse-system/synapse init .
+cd ../web && ~/.synapse-system/synapse init .
 
 # Result: Language-specific knowledge in each subdirectory
 ```
@@ -330,16 +336,16 @@ When working across multiple languages, each `.synapse/` installation provides:
 
 ```bash
 # Check synapse health
-python ~/.synapse-system/tools/synapse_tools.py health
+~/.synapse-system/synapse status
 
 # Test search functionality
-python ~/.synapse-system/tools/synapse_tools.py search "rust patterns"
+~/.synapse-system/synapse search "rust patterns"
 
-# Verify language detection
-~/.synapse-system/deploy/init-project.sh --language auto --project .
+# Start services if needed
+~/.synapse-system/synapse start
 
-# Check sync status
-~/.synapse-system/deploy/sync-global.sh status
+# Re-initialize project
+~/.synapse-system/synapse init . --force
 ```
 
 ## Future Enhancements

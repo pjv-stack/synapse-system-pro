@@ -52,7 +52,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 Run the magic command:
 
 ```bash
-~/.synapse-system/neo4j/activate.sh
+~/.synapse-system/synapse start
 ```
 
 **What happens:**
@@ -91,55 +91,44 @@ cd /path/to/your/project
 # Example: cd ~/dev/my-awesome-app
 ```
 
-### Step 2: Copy Synapse Into Your Project
+### Step 2: Initialize Your Project
 
 ```bash
-cp -r ~/.synapse-system .synapse
+~/.synapse-system/synapse init .
 ```
 
-This creates a `.synapse/` folder in your project. Think of it as your project's "brain"!
+This automatically detects your project language and creates the appropriate setup:
 
 ```
 my-awesome-app/
 ├── src/
-├── Cargo.toml          # Rust project file
+├── Cargo.toml          # Rust project file (detected)
 ├── README.md
-└── .synapse/           # ← Your project's knowledge base
-    ├── instructions/
-    ├── templates/
-    ├── vector_engine.py
-    └── ...
+├── .synapse/           # ← Your project's knowledge base
+│   ├── instructions/   # Rust-specific guides
+│   ├── standards/      # Rust conventions
+│   └── templates/      # Rust patterns
+├── .claude/            # ← Claude Code integration
+│   └── agents/         # Language-specific agents
+└── .synapse.yml        # Configuration
 ```
 
-### Step 3: Let the Agent Set Everything Up
+### Step 3: Start Using with Claude Code
 
-Open **Claude Code** and type:
+Your project is now ready! Simply use:
 
 ```
 @synapse-project-manager
 
-I just copied synapse into my project. Please set it up - detect the language, configure the templates, and initialize the knowledge base.
+Help me implement authentication following Rust best practices.
 ```
 
-**The agent will:**
-1. 🔍 **Detect your language**: "I see Cargo.toml - this is a Rust project!"
-2. ⚙️ **Configure Rust-specific templates**: Error handling patterns, testing conventions
-3. 🧠 **Set up BGE-M3 embeddings**: Creates semantic understanding of your code
-4. 📚 **Build project knowledge base**: Ingests your README, docs, config files
-5. 🔧 **Create search tools**: So you can query your project's context
-
-**Expected conversation:**
-```
-Agent: I've detected this is a Rust project based on Cargo.toml. Let me configure Synapse for Rust development.
-
-✓ Language detected: Rust
-✓ Copied Rust-specific templates and standards
-✓ Initialized BGE-M3 embeddings (1024-dimensional vectors)
-✓ Ingested project files: Cargo.toml, README.md, src/
-✓ Created project search capabilities
-
-Your Synapse setup is complete! I can now help with Rust-specific development using your project's context.
-```
+**The agent now has:**
+- 🔍 **Language awareness**: Knows this is a Rust project
+- ⚙️ **Rust-specific knowledge**: Error handling patterns, testing conventions, naming standards
+- 🧠 **Project context**: Understanding of your specific codebase structure
+- 📚 **Best practices**: Curated Rust development patterns
+- 🔧 **Search capabilities**: Can query both global and project-specific knowledge
 
 ---
 
@@ -162,13 +151,13 @@ Can you help me implement this following our project's patterns?
 - 🎯 Checks your error handling conventions
 - ✅ Provides code that fits your style
 
-#### Option 2: Search Your Project Directly
+#### Option 2: Search Knowledge Directly
 
 ```bash
-cd .synapse
-python search.py "authentication patterns"
-python search.py "error handling in our API"
-python search.py "how do we handle database connections"
+# Search global knowledge base
+~/.synapse-system/synapse search "rust authentication patterns"
+~/.synapse-system/synapse search "error handling best practices"
+~/.synapse-system/synapse search "database connection patterns"
 ```
 
 ### Scenario: Working on Error Handling
@@ -176,8 +165,7 @@ python search.py "how do we handle database connections"
 Instead of googling "Rust error handling", you can:
 
 ```bash
-cd .synapse
-python search.py "error handling best practices"
+~/.synapse-system/synapse search "rust error handling best practices"
 ```
 
 **Results include:**
@@ -246,8 +234,8 @@ sudo systemctl status docker
 # Restart Docker if needed
 sudo systemctl start docker
 
-# Try activation again
-~/.synapse-system/neo4j/activate.sh
+# Try starting synapse again
+~/.synapse-system/synapse start
 ```
 
 ### "BGE-M3 model not downloading"
@@ -269,22 +257,23 @@ python vector_engine.py "test"
 ```bash
 # Make sure you're in the right directory
 pwd
-ls -la  # Should see .synapse/ folder
+ls -la  # Should see .synapse/ and .claude/ folders
 
-# Re-run ingestion manually
-cd .synapse
-python ingest.py --force
+# Re-initialize project if needed
+~/.synapse-system/synapse init . --force
 ```
 
 ### "Search not returning results"
 
 ```bash
-# Check if knowledge base was built
-cd .synapse
-python search.py --help
+# Check system status
+~/.synapse-system/synapse status
 
-# Rebuild the knowledge base
-python ingest.py --force
+# Start services if needed
+~/.synapse-system/synapse start
+
+# Test search functionality
+~/.synapse-system/synapse search "test query"
 ```
 
 ---
@@ -294,34 +283,35 @@ python ingest.py --force
 ### Global Commands
 ```bash
 # Start Synapse system
-~/.synapse-system/neo4j/activate.sh
+~/.synapse-system/synapse start
 
 # Check system status
-~/.synapse-system/neo4j/activate.sh --status
+~/.synapse-system/synapse status
 
 # Stop all services
-~/.synapse-system/neo4j/activate.sh --stop
+~/.synapse-system/synapse stop
 ```
 
 ### Project Setup Commands
 ```bash
-# Copy Synapse to project
-cp -r ~/.synapse-system .synapse
+# Initialize project with synapse
+~/.synapse-system/synapse init .
 
-# Then use @synapse-project-manager agent in Claude Code
+# Then use agents in Claude Code:
+# @synapse-project-manager
+# @rust-specialist (or other language specialist)
 ```
 
 ### Daily Usage Commands
 ```bash
-# Search your project's knowledge
-cd .synapse
-python search.py "your query here"
+# Search global knowledge base
+~/.synapse-system/synapse search "your query here"
 
-# Update knowledge base after big changes
-python ingest.py
+# Get help
+~/.synapse-system/synapse help
 
-# Test BGE-M3 embeddings
-python vector_engine.py "test text"
+# Check system health
+~/.synapse-system/synapse status
 ```
 
 ---
