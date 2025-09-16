@@ -2,41 +2,58 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Quick Start
+
+```bash
+# Start synapse services
+~/.synapse-system/synapse start
+
+# Initialize your project with agents
+cd your-project/
+~/.synapse-system/synapse init .
+
+# Use agents in Claude Code:
+# @synapse-project-manager help with this project
+# @rust-specialist implement async patterns
+```
+
 ## System Overview
 
 Synapse System is a hybrid intelligence framework combining Neo4j knowledge graphs, Redis caching, and BGE-M3 vector embeddings to provide agents with persistent memory and semantic search capabilities.
 
 ## Essential Commands
 
-### System Activation & Management
+### Synapse CLI (Simplified)
 ```bash
-# One-command system activation (starts services, checks health, runs ingestion)
-~/.synapse-system/.synapse/neo4j/activate.sh
+# Start synapse services (Neo4j, Redis)
+~/.synapse-system/synapse start
 
-# Check system health status
-~/.synapse-system/.synapse/neo4j/activate.sh --status
+# Check system health
+~/.synapse-system/synapse status
 
-# Force re-ingestion of all files
-~/.synapse-system/.synapse/neo4j/activate.sh --force
+# Stop services
+~/.synapse-system/synapse stop
 
-# Stop all services
-~/.synapse-system/.synapse/neo4j/activate.sh --stop
+# Search global knowledge base
+~/.synapse-system/synapse search "query terms"
+
+# Initialize project with language-specific agents
+~/.synapse-system/synapse init [directory]
+
+# Show help
+~/.synapse-system/synapse help
 ```
 
-### Development Commands
+### Legacy Commands (Still Available)
 ```bash
-# Activate Python virtual environment
-cd ~/.synapse-system/.synapse/neo4j
-source .venv/bin/activate
+# Direct activation script (advanced users)
+~/.synapse-system/.synapse/neo4j/activate.sh
 
-# Run manual ingestion
-python ingestion.py
+# Manual ingestion
+cd ~/.synapse-system/.synapse/neo4j && source .venv/bin/activate && python ingestion.py
 
-# Search knowledge base
-python synapse_search.py "query terms"
-
-# Check service health programmatically
-python context_manager.py --health
+# Direct Python access (advanced)
+cd ~/.synapse-system/.synapse/neo4j && source .venv/bin/activate && python context_manager.py --health
 ```
 
 ### Docker Services
@@ -77,18 +94,29 @@ docker-compose logs redis
 
 ### Setting Up Synapse for a Project
 ```bash
-# Copy synapse to project
-cp -r ~/.synapse-system/.synapse /path/to/project/.synapse
+# Initialize any project with language-specific agents
+cd /path/to/project
+~/.synapse-system/synapse init .
 
-# Use synapse-project-manager agent in Claude Code
-# It will auto-detect language and configure appropriately
+# This creates:
+# - .claude/agents/language-specialist.md (rust, typescript, golang, python)
+# - .claude/agents/synapse-project-manager.md (universal)
+# - .synapse.yml (project config)
 ```
 
-### Project-Specific Search
+### Using Project Agents
 ```bash
-cd project/.synapse/neo4j
-source .venv/bin/activate
-python synapse_search.py "project specific query"
+# In Claude Code, use the agents:
+@synapse-project-manager help with this project
+@rust-specialist implement error handling
+@typescript-specialist create a React component
+```
+
+### Global Knowledge Search
+```bash
+# Search from anywhere (uses global knowledge base)
+~/.synapse-system/synapse search "project patterns rust"
+~/.synapse-system/synapse search "testing strategies typescript"
 ```
 
 ## Key Implementation Principles
