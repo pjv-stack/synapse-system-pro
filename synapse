@@ -210,14 +210,24 @@ init_project() {
     # Create .claude directory and agents
     mkdir -p "$project_dir/.claude/agents"
 
-    # Copy synapse-project-manager (universal)
+    # Copy universal agents (always included)
     local agents_source="$SYNAPSE_HOME/.synapse/agents"
-    if [[ -f "$agents_source/synapse-project-manager.md" ]]; then
-        cp "$agents_source/synapse-project-manager.md" "$project_dir/.claude/agents/"
-        success "Added synapse-project-manager agent"
-    else
-        warning "synapse-project-manager.md not found in $agents_source"
-    fi
+    local universal_agents=(
+        "synapse-project-manager"
+        "code-hound"
+        "git-workflow"
+        "test-runner"
+        "file-creator"
+    )
+
+    for agent in "${universal_agents[@]}"; do
+        if [[ -f "$agents_source/${agent}.md" ]]; then
+            cp "$agents_source/${agent}.md" "$project_dir/.claude/agents/"
+            success "Added $agent agent"
+        else
+            warning "${agent}.md not found in $agents_source"
+        fi
+    done
 
     # Copy language-specific agent if available
     if [[ "$language" != "unknown" && "$language" != "generic" ]]; then
@@ -257,6 +267,10 @@ EOF
     if [[ "$language" != "unknown" && "$language" != "generic" ]]; then
         info "  @${language}-specialist implement error handling"
     fi
+    info "  @code-hound review my code for quality issues"
+    info "  @git-workflow create feature branch and PR"
+    info "  @test-runner execute tests and analyze failures"
+    info "  @file-creator setup project templates"
     echo
     info "Search global knowledge: $SYNAPSE_HOME/synapse search \"query\""
 }
