@@ -1,5 +1,18 @@
 #!/bin/bash
-# Simple Claude Code Setup Wrapper
-# Usage: setup-claude-code [description] [features]
+# Claude Code Setup - Now Simplified!
+# Usage: setup-claude-code [project-directory]
 
-exec ~/.synapse-system/.synapse/deploy/setup-claude-code.sh "$@"
+echo "🎯 Claude Code + Synapse Setup"
+echo "==============================="
+echo
+echo "The setup has been greatly simplified!"
+echo
+echo "Just run: ~/.synapse-system/synapse init ."
+echo
+
+# Delegate to the new simple system
+if [[ -n "$1" ]]; then
+    exec ~/.synapse-system/synapse init "$1"
+else
+    exec ~/.synapse-system/synapse init .
+fi

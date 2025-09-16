@@ -1,0 +1,294 @@
+#!/bin/bash
+# Synapse System - Unified CLI
+# Global-first architecture with project agent integration
+
+set -e
+
+SYNAPSE_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NEO4J_DIR="$SYNAPSE_HOME/.synapse/neo4j"
+
+# Colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+log() { echo -e "${BLUE}[SYNAPSE]${NC} $1"; }
+success() { echo -e "${GREEN}✓${NC} $1"; }
+info() { echo -e "${CYAN}ℹ${NC} $1"; }
+warning() { echo -e "${YELLOW}⚠${NC} $1"; }
+error() { echo -e "${RED}✗${NC} $1"; }
+
+show_help() {
+    cat << EOF
+Synapse System - Global Knowledge and Agent Management
+
+USAGE:
+    synapse <command> [options]
+
+COMMANDS:
+    start               Start synapse services (Neo4j, Redis)
+    stop                Stop synapse services
+    status              Check service health
+    search <query>      Search global knowledge base
+    init [directory]    Initialize project with language-specific agents
+    help                Show this help
+
+EXAMPLES:
+    synapse start                           # Start global services
+    synapse search "rust error handling"    # Search knowledge
+    synapse init .                          # Setup current directory
+    synapse init ~/my-project               # Setup specific project
+
+For more information: https://github.com/your-org/synapse-system
+EOF
+}
+
+# Start synapse services
+start_services() {
+    log "Starting synapse services..."
+
+    if ! command -v docker &> /dev/null; then
+        error "Docker is required but not installed"
+        return 1
+    fi
+
+    cd "$NEO4J_DIR"
+    docker-compose up -d
+
+    # Give services time to start
+    sleep 3
+
+    # Check if services are ready
+    if check_services_health; then
+        success "Synapse services started successfully"
+        info "Neo4j: http://localhost:7474 (neo4j/synapse_neo4j_pass)"
+        info "Redis: localhost:6379"
+    else
+        warning "Services started but may not be fully ready yet"
+    fi
+}
+
+# Stop synapse services
+stop_services() {
+    log "Stopping synapse services..."
+    cd "$NEO4J_DIR"
+    docker-compose down
+    success "Synapse services stopped"
+}
+
+# Check service health
+check_services_health() {
+    local healthy=true
+
+    # Check Neo4j
+    if ! curl -s http://localhost:7474 &> /dev/null; then
+        healthy=false
+    fi
+
+    # Check Redis
+    if ! nc -z localhost 6379 &> /dev/null; then
+        healthy=false
+    fi
+
+    return $([ "$healthy" = true ])
+}
+
+# Show service status
+show_status() {
+    log "Checking synapse system status..."
+
+    echo
+    echo "Services:"
+
+    if curl -s http://localhost:7474 &> /dev/null; then
+        success "Neo4j running on http://localhost:7474"
+    else
+        error "Neo4j not responding"
+    fi
+
+    if nc -z localhost 6379 &> /dev/null; then
+        success "Redis running on localhost:6379"
+    else
+        error "Redis not responding"
+    fi
+
+    echo
+    echo "Knowledge Base:"
+    cd "$NEO4J_DIR"
+    if [[ -f ".venv/bin/activate" ]]; then
+        source .venv/bin/activate
+        if python -c "from context_manager import SynapseContextManager; SynapseContextManager().health_check()" 2>/dev/null; then
+            success "Knowledge base accessible"
+        else
+            warning "Knowledge base may need ingestion"
+        fi
+    else
+        warning "Python environment not found"
+    fi
+}
+
+# Search global knowledge base
+search_knowledge() {
+    local query="$1"
+
+    if [[ -z "$query" ]]; then
+        error "Search query required"
+        echo "Usage: synapse search \"your query\""
+        return 1
+    fi
+
+    log "Searching for: $query"
+
+    # Check if services are running
+    if ! check_services_health; then
+        warning "Services not running, starting them..."
+        start_services
+        sleep 2
+    fi
+
+    cd "$NEO4J_DIR"
+    if [[ -f ".venv/bin/activate" ]]; then
+        source .venv/bin/activate
+        python synapse_search.py "$query"
+    else
+        error "Python environment not found. Run: cd $NEO4J_DIR && ./activate.sh"
+        return 1
+    fi
+}
+
+# Detect project language
+detect_language() {
+    local project_dir="${1:-.}"
+
+    if [[ -f "$project_dir/Cargo.toml" ]]; then
+        echo "rust"
+    elif [[ -f "$project_dir/go.mod" ]]; then
+        echo "golang"
+    elif [[ -f "$project_dir/package.json" ]]; then
+        echo "typescript"
+    elif [[ -f "$project_dir/pyproject.toml" || -f "$project_dir/requirements.txt" || -f "$project_dir/setup.py" ]]; then
+        echo "python"
+    elif [[ -f "$project_dir/build.zig" ]]; then
+        echo "zig"
+    elif [[ -f "$project_dir/Makefile" || -f "$project_dir/CMakeLists.txt" ]]; then
+        echo "c"
+    else
+        echo "unknown"
+    fi
+}
+
+# Initialize project with agents
+init_project() {
+    local project_dir="${1:-.}"
+    project_dir="$(realpath "$project_dir")"
+
+    if [[ ! -d "$project_dir" ]]; then
+        error "Directory does not exist: $project_dir"
+        return 1
+    fi
+
+    if [[ ! -w "$project_dir" ]]; then
+        error "Directory is not writable: $project_dir"
+        return 1
+    fi
+
+    log "Initializing synapse for project: $(basename "$project_dir")"
+
+    # Detect language
+    local language=$(detect_language "$project_dir")
+    if [[ "$language" == "unknown" ]]; then
+        warning "Could not detect project language"
+        info "Supported: Cargo.toml (rust), package.json (typescript), go.mod (golang), pyproject.toml (python)"
+        language="generic"
+    else
+        info "Detected language: $language"
+    fi
+
+    # Create .claude directory and agents
+    mkdir -p "$project_dir/.claude/agents"
+
+    # Copy synapse-project-manager (universal)
+    local agents_source="$SYNAPSE_HOME/.synapse/agents"
+    if [[ -f "$agents_source/synapse-project-manager.md" ]]; then
+        cp "$agents_source/synapse-project-manager.md" "$project_dir/.claude/agents/"
+        success "Added synapse-project-manager agent"
+    else
+        warning "synapse-project-manager.md not found in $agents_source"
+    fi
+
+    # Copy language-specific agent if available
+    if [[ "$language" != "unknown" && "$language" != "generic" ]]; then
+        local lang_agent="$agents_source/${language}-specialist.md"
+        if [[ -f "$lang_agent" ]]; then
+            cp "$lang_agent" "$project_dir/.claude/agents/"
+            success "Added ${language}-specialist agent"
+        else
+            info "No specific agent for $language (will create generic template)"
+            # TODO: Create generic template
+        fi
+    fi
+
+    # Create .synapse.yml config
+    cat > "$project_dir/.synapse.yml" << EOF
+version: "1.0"
+language: "$language"
+synapse_home: "$SYNAPSE_HOME"
+project_name: "$(basename "$project_dir")"
+knowledge_paths:
+  - "./docs"
+  - "./README.md"
+  - "./CHANGELOG.md"
+created_at: "$(date -Iseconds)"
+EOF
+
+    success "Created .synapse.yml configuration"
+
+    echo
+    success "Project initialized successfully!"
+    echo
+    info "Available agents:"
+    find "$project_dir/.claude/agents" -name "*.md" -exec basename {} \; | sed 's/^/  - /'
+    echo
+    info "Usage in Claude Code:"
+    info "  @synapse-project-manager help with this $language project"
+    if [[ "$language" != "unknown" && "$language" != "generic" ]]; then
+        info "  @${language}-specialist implement error handling"
+    fi
+    echo
+    info "Search global knowledge: $SYNAPSE_HOME/synapse search \"query\""
+}
+
+# Main command dispatcher
+main() {
+    case "${1:-help}" in
+        start)
+            start_services
+            ;;
+        stop)
+            stop_services
+            ;;
+        status)
+            show_status
+            ;;
+        search)
+            search_knowledge "$2"
+            ;;
+        init)
+            init_project "$2"
+            ;;
+        help|--help|-h)
+            show_help
+            ;;
+        *)
+            error "Unknown command: $1"
+            echo
+            show_help
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

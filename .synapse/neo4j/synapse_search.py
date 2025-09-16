@@ -21,7 +21,7 @@ def activate_system():
     This ensures the system is healthy and up-to-date before searching.
     """
     synapse_root = Path.home() / ".synapse-system"
-    activate_script = synapse_root / "neo4j" / "activate.sh"
+    activate_script = synapse_root / ".synapse" / "neo4j" / "activate.sh"
 
     if not activate_script.exists():
         return False, "Activation script not found"
@@ -45,7 +45,7 @@ def activate_system():
     except Exception as e:
         return False, f"Activation error: {str(e)}"
 
-def search_synapse_context(query: str, max_results: int = 5, auto_activate: bool = True):
+def search_synapse_context(query: str, max_results: int = 5, auto_activate: bool = False):
     """
     Main function for searching synapse context.
 

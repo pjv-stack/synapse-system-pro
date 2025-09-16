@@ -1,5 +1,32 @@
 #!/bin/bash
-# Ultra-simple Synapse setup for Claude Code
-# Usage: ~/.synapse-system/setup [description]
+# Synapse Global-First Setup
+# Usage: ~/.synapse-system/setup [project-directory]
 
-exec ~/.synapse-system/.synapse/deploy/simple-setup.sh . auto "$1"
+echo "🚀 Synapse System - Global-First Setup"
+echo "======================================"
+echo
+echo "The setup system has been simplified!"
+echo
+echo "📦 For global services:"
+echo "  ~/.synapse-system/synapse start"
+echo
+echo "🛠️  For project setup:"
+echo "  ~/.synapse-system/synapse init ."
+echo
+echo "📚 For searching knowledge:"
+echo "  ~/.synapse-system/synapse search \"query\""
+echo
+echo "✨ Full usage:"
+echo "  ~/.synapse-system/synapse help"
+echo
+
+# If a directory is provided, initialize it
+if [[ -n "$1" ]] && [[ -d "$1" ]]; then
+    echo "🔧 Initializing project: $1"
+    exec ~/.synapse-system/synapse init "$1"
+elif [[ -n "$1" ]]; then
+    echo "❌ Directory not found: $1"
+    exit 1
+else
+    echo "💡 To setup current directory: ~/.synapse-system/synapse init ."
+fi
