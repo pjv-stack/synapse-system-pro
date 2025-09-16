@@ -4,7 +4,7 @@
 
 set -e
 
-SYNAPSE_ROOT="$HOME/.synapse-system"
+SYNAPSE_ROOT="$HOME/.synapse-system/.synapse"
 
 # Colors
 GREEN='\033[0;32m'
@@ -71,11 +71,14 @@ setup() {
 ## Quick Commands
 
 \`\`\`bash
-# Search synapse knowledge
+# Search synapse knowledge (if local synapse exists)
 cd .synapse && python search.py "your query"
 
+# Search global synapse knowledge
+cd ~/.synapse-system/.synapse/neo4j && source .venv/bin/activate && python synapse_search.py "your query"
+
 # Check synapse health
-python ~/.synapse-system/tools/synapse_tools.py health
+cd ~/.synapse-system/.synapse/neo4j && source .venv/bin/activate && python context_manager.py --health
 \`\`\`
 
 ## Usage

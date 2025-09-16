@@ -8,7 +8,7 @@
 set -e
 
 # Configuration
-SYNAPSE_ROOT="$HOME/.synapse-system"
+SYNAPSE_ROOT="$HOME/.synapse-system/.synapse"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Colors for output
@@ -340,7 +340,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(__file__))
 
 # Import the enhanced ingestion system
-sys.path.insert(0, os.path.expanduser("~/.synapse-system/neo4j"))
+sys.path.insert(0, os.path.expanduser("~/.synapse-system/.synapse/neo4j"))
 from ingestion import SynapseIngestion
 
 class ProjectSynapseIngestion(SynapseIngestion):

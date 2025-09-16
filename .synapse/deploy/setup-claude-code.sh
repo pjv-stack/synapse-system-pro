@@ -7,7 +7,7 @@
 set -e
 
 # Configuration
-SYNAPSE_ROOT="$HOME/.synapse-system"
+SYNAPSE_ROOT="$HOME/.synapse-system/.synapse"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Colors for output
@@ -93,11 +93,8 @@ detect_language() {
     elif [[ -f "$project_dir/go.mod" ]] || [[ -f "$project_dir/go.sum" ]]; then
         echo "golang"
     elif [[ -f "$project_dir/package.json" ]]; then
-        if grep -q "typescript" "$project_dir/package.json" 2>/dev/null; then
-            echo "typescript"
-        else
-            echo "javascript"
-        fi
+        # Treat all Node.js projects as typescript for synapse compatibility
+        echo "typescript"
     elif [[ -f "$project_dir/build.zig" ]]; then
         echo "zig"
     elif [[ -f "$project_dir/Makefile" ]] || [[ -f "$project_dir/CMakeLists.txt" ]]; then
@@ -331,10 +328,10 @@ $(find "$project_dir" -maxdepth 1 -name "*.md" -o -name "*.toml" -o -name "*.jso
 cd .synapse && python search.py "error handling patterns"
 
 # Get coding standards
-python ~/.synapse-system/tools/synapse_tools.py standard naming-conventions --language ${language}
+cd .synapse && python synapse_search.py "naming conventions ${language}"
 
 # Check synapse health
-python ~/.synapse-system/tools/synapse_tools.py health
+cd .synapse/neo4j && source .venv/bin/activate && python context_manager.py --health
 
 # Update project knowledge
 cd .synapse && python ingest.py

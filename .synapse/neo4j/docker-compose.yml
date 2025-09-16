@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   neo4j:
     image: neo4j:latest
@@ -9,14 +8,10 @@ services:
       - neo4j_data:/data
       - neo4j_logs:/logs
     environment:
-      - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}
-      - NEO4J_PLUGINS=["apoc"]
-      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
-      - NEO4J_dbms_memory_heap_initial_size=1G
-      - NEO4J_dbms_memory_heap_max_size=2G
+      NEO4J_AUTH: neo4j/synapse_neo4j_pass
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
     restart: unless-stopped
-    env_file:
-      - .env
 
   redis:
     image: redis:latest
@@ -24,10 +19,8 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    command: redis-server --appendonly yes
     restart: unless-stopped
-    env_file:
-      - .env
 
 volumes:
   neo4j_data:

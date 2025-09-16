@@ -9,9 +9,20 @@
 
 set -e  # Exit on any error
 
-# Configuration
-SYNAPSE_ROOT="$HOME/.synapse-system"
-NEO4J_DIR="$SYNAPSE_ROOT/neo4j"
+# Configuration - Detect if we're in project or global mode
+if [[ -f "./neo4j/activate.sh" && -d "./instructions" ]]; then
+    # We're in a project's .synapse directory
+    SYNAPSE_ROOT="$(pwd)"
+    NEO4J_DIR="$SYNAPSE_ROOT/neo4j"
+elif [[ -d "$HOME/.synapse-system/.synapse" ]]; then
+    # Global synapse system
+    SYNAPSE_ROOT="$HOME/.synapse-system/.synapse"
+    NEO4J_DIR="$SYNAPSE_ROOT/neo4j"
+else
+    # Fallback to old structure
+    SYNAPSE_ROOT="$HOME/.synapse-system"
+    NEO4J_DIR="$SYNAPSE_ROOT/neo4j"
+fi
 VENV_DIR="$NEO4J_DIR/.venv"
 COMPOSE_FILE="$NEO4J_DIR/docker-compose.yml"
 
