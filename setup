@@ -1,0 +1,5 @@
+#!/bin/bash
+# Ultra-simple Synapse setup for Claude Code
+# Usage: ~/.synapse-system/setup [description]
+
+exec ~/.synapse-system/deploy/simple-setup.sh . auto "$1"

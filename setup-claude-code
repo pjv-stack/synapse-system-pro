@@ -1,0 +1,5 @@
+#!/bin/bash
+# Simple Claude Code Setup Wrapper
+# Usage: setup-claude-code [description] [features]
+
+exec ~/.synapse-system/deploy/setup-claude-code.sh "$@"
