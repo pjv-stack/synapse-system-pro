@@ -2,7 +2,7 @@
 
 *A simple, step-by-step guide to set up and use Synapse in your projects*
 
-## 🎯 What You're Building
+## 1.) what
 
 Imagine giving your AI assistant a memory system that remembers:
 - Your project's coding patterns
