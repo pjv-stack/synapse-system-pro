@@ -229,7 +229,7 @@ class SynapseContextManager:
                     MATCH (f:SynapseFile)
                     WHERE ANY(term IN $terms WHERE
                         toLower(f.name) CONTAINS term OR toLower(f.path) CONTAINS term)
-                    AND NOT f.path IN [r.path | r IN $existing_paths]
+                    AND NOT f.path IN $existing_paths
                     RETURN f,
                            size([term IN $terms WHERE
                                toLower(f.name) CONTAINS term OR toLower(f.path) CONTAINS term]) as relevance_score

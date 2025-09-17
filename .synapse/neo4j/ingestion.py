@@ -88,7 +88,7 @@ class SynapseIngestion:
         files = []
 
         for dir_name in target_dirs:
-            dir_path = self.synapse_root / dir_name
+            dir_path = self.synapse_root / ".synapse" / dir_name
             if dir_path.exists():
                 files.extend(dir_path.rglob("*.md"))
                 files.extend(dir_path.rglob("*.sh"))
