@@ -1,0 +1,8 @@
+# [SPEC_NAME] - Lite Summary
+
+[ELEVATOR_PITCH]
+
+## Key Points
+- [POINT_1]
+- [POINT_2]
+- [POINT_3]

@@ -29,22 +29,22 @@ class SynapseTools:
 
     def _find_synapse_installation(self) -> Optional[Path]:
         """Find synapse installation (project-local or global)"""
-        # Check for project-local synapse
-        local_synapse = self.project_path / ".synapse"
-        if local_synapse.exists() and (local_synapse / "search.py").exists():
-            return local_synapse
+        # Check for project-local synapse (currently not implemented - would need local scripts)
+        # local_synapse = self.project_path / ".synapse"
+        # if local_synapse.exists() and (local_synapse / "synapse_search.py").exists():
+        #     return local_synapse
 
-        # Check parent directories for synapse
-        current = self.project_path
-        while current.parent != current:
-            synapse_dir = current / ".synapse"
-            if synapse_dir.exists() and (synapse_dir / "search.py").exists():
-                return synapse_dir
-            current = current.parent
+        # Check parent directories for synapse (currently not implemented)
+        # current = self.project_path
+        # while current.parent != current:
+        #     synapse_dir = current / ".synapse"
+        #     if synapse_dir.exists() and (synapse_dir / "synapse_search.py").exists():
+        #         return synapse_dir
+        #     current = current.parent
 
-        # Fall back to global synapse
-        global_synapse = Path.home() / ".synapse-system" / "neo4j"
-        if global_synapse.exists():
+        # Always use global synapse for now
+        global_synapse = Path.home() / ".synapse-system" / ".synapse" / "neo4j"
+        if global_synapse.exists() and (global_synapse / "synapse_search.py").exists():
             return global_synapse
 
         return None
@@ -73,24 +73,14 @@ class SynapseTools:
             enhanced_query = f"{language_context} {query}"
 
         try:
-            if self.is_local:
-                # Use project-local synapse
-                result = subprocess.run(
-                    [sys.executable, "search.py", enhanced_query],
-                    cwd=self.synapse_path,
-                    capture_output=True,
-                    text=True,
-                    timeout=30
-                )
-            else:
-                # Use global synapse
-                result = subprocess.run(
-                    [sys.executable, "synapse_search.py", enhanced_query, str(max_results)],
-                    cwd=self.synapse_path,
-                    capture_output=True,
-                    text=True,
-                    timeout=30
-                )
+            # Always use global synapse scripts for now
+            result = subprocess.run(
+                [sys.executable, "synapse_search.py", enhanced_query, str(max_results)],
+                cwd=self.synapse_path,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
 
             if result.returncode == 0:
                 try:
@@ -123,77 +113,96 @@ class SynapseTools:
         Returns:
             Dictionary with standard content or error
         """
-        query = f"standards {standard_name}"
-        if language:
-            query = f"{language} {query}"
-
-        result = self.search(query, max_results=3, language_context=language)
-
-        if "error" in result:
-            return result
-
-        # Filter results for standards files
-        context = result.get("context", {})
-        primary_matches = context.get("primary_matches", [])
-
-        standards_matches = [
-            match for match in primary_matches
-            if "standards" in match.get("path", "").lower()
-            and standard_name.lower() in match.get("path", "").lower()
-        ]
-
-        if standards_matches:
+        if not self.synapse_path:
             return {
-                "standard": standards_matches[0],
-                "related": standards_matches[1:],
-                "source": "synapse"
-            }
-        else:
-            return {
-                "error": f"Standard '{standard_name}' not found",
-                "suggestion": f"Available standards can be found by searching 'standards {language or ''}'"
+                "error": "No synapse installation found",
+                "suggestion": "Run synapse initialization for this project"
             }
 
-    def get_template(self, template_name: str, language: Optional[str] = None) -> Dict[str, Any]:
+        if not language:
+            return {
+                "error": "Language parameter is required for standards",
+                "suggestion": "Specify language (e.g., 'rust', 'golang', 'typescript')"
+            }
+
+        try:
+            result = subprocess.run(
+                [sys.executable, "synapse_standard.py", standard_name, language],
+                cwd=self.synapse_path,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+
+            if result.returncode == 0:
+                try:
+                    return json.loads(result.stdout)
+                except json.JSONDecodeError:
+                    return {
+                        "error": "Invalid JSON response from synapse_standard.py",
+                        "raw_output": result.stdout
+                    }
+            else:
+                return {
+                    "error": "Standard retrieval failed",
+                    "exit_code": result.returncode,
+                    "stderr": result.stderr
+                }
+
+        except subprocess.TimeoutExpired:
+            return {"error": "Standard retrieval timed out"}
+        except Exception as e:
+            return {"error": f"Standard retrieval failed: {str(e)}"}
+
+    def get_template(self, template_name: str, variables: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """
         Retrieve a project template.
 
         Args:
-            template_name: Name of the template (e.g., "cli-app")
-            language: Target language for language-specific templates
+            template_name: Name of the template (e.g., "mission", "spec")
+            variables: Optional dictionary of variables to substitute in template
 
         Returns:
             Dictionary with template information or error
         """
-        query = f"templates {template_name}"
-        if language:
-            query = f"{language} {query}"
-
-        result = self.search(query, max_results=3, language_context=language)
-
-        if "error" in result:
-            return result
-
-        context = result.get("context", {})
-        primary_matches = context.get("primary_matches", [])
-
-        template_matches = [
-            match for match in primary_matches
-            if "templates" in match.get("path", "").lower()
-            and template_name.lower() in match.get("path", "").lower()
-        ]
-
-        if template_matches:
+        if not self.synapse_path:
             return {
-                "template": template_matches[0],
-                "related": template_matches[1:],
-                "source": "synapse"
+                "error": "No synapse installation found",
+                "suggestion": "Run synapse initialization for this project"
             }
-        else:
-            return {
-                "error": f"Template '{template_name}' not found",
-                "suggestion": f"Available templates can be found by searching 'templates {language or ''}'"
-            }
+
+        try:
+            cmd = [sys.executable, "synapse_template.py", template_name]
+            if variables:
+                cmd.append(json.dumps(variables))
+
+            result = subprocess.run(
+                cmd,
+                cwd=self.synapse_path,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+
+            if result.returncode == 0:
+                try:
+                    return json.loads(result.stdout)
+                except json.JSONDecodeError:
+                    return {
+                        "error": "Invalid JSON response from synapse_template.py",
+                        "raw_output": result.stdout
+                    }
+            else:
+                return {
+                    "error": "Template retrieval failed",
+                    "exit_code": result.returncode,
+                    "stderr": result.stderr
+                }
+
+        except subprocess.TimeoutExpired:
+            return {"error": "Template retrieval timed out"}
+        except Exception as e:
+            return {"error": f"Template retrieval failed: {str(e)}"}
 
     def get_instruction(self, instruction_name: str, language: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -251,50 +260,43 @@ class SynapseTools:
             }
 
         try:
-            if self.is_local:
-                # Check project-local synapse
-                config_file = self.synapse_path / "config.json"
-                if config_file.exists():
-                    with open(config_file) as f:
-                        config = json.load(f)
-                    return {
-                        "status": "healthy",
-                        "type": "project_local",
-                        "path": str(self.synapse_path),
-                        "language": config.get("language", "unknown"),
-                        "project": config.get("project_name", "unknown")
-                    }
-                else:
-                    return {
-                        "status": "degraded",
-                        "type": "project_local",
-                        "message": "Configuration file missing"
-                    }
-            else:
-                # Check global synapse
-                result = subprocess.run(
-                    [sys.executable, "context_manager.py", "--health"],
-                    cwd=self.synapse_path,
-                    capture_output=True,
-                    text=True,
-                    timeout=10
-                )
+            # Use dedicated health check script
+            result = subprocess.run(
+                [sys.executable, "synapse_health.py"],
+                cwd=self.synapse_path,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
 
-                if result.returncode == 0:
+            if result.returncode == 0:
+                try:
                     health_data = json.loads(result.stdout)
                     return {
-                        "status": "healthy",
+                        "status": health_data.get("overall_status", "unknown"),
                         "type": "global",
                         "path": str(self.synapse_path),
                         "details": health_data
                     }
-                else:
+                except json.JSONDecodeError:
                     return {
                         "status": "error",
-                        "type": "global",
-                        "message": result.stderr
+                        "message": "Invalid JSON response from health check",
+                        "raw_output": result.stdout
                     }
+            else:
+                return {
+                    "status": "error",
+                    "message": "Health check failed",
+                    "exit_code": result.returncode,
+                    "stderr": result.stderr
+                }
 
+        except subprocess.TimeoutExpired:
+            return {
+                "status": "error",
+                "message": "Health check timed out"
+            }
         except Exception as e:
             return {
                 "status": "error",
@@ -318,32 +320,18 @@ class SynapseTools:
             }
 
         try:
-            if self.is_local:
-                # Use project-local ingestion
-                cmd = [sys.executable, "ingest.py"]
-                if force:
-                    cmd.append("--force")
+            # Always use global ingestion for now
+            cmd = [sys.executable, "ingestion.py"]
+            if force:
+                cmd.append("--force")
 
-                result = subprocess.run(
-                    cmd,
-                    cwd=self.synapse_path,
-                    capture_output=True,
-                    text=True,
-                    timeout=300  # 5 minutes
-                )
-            else:
-                # Use global ingestion
-                cmd = [sys.executable, "ingestion.py"]
-                if force:
-                    cmd.append("--force")
-
-                result = subprocess.run(
-                    cmd,
-                    cwd=self.synapse_path,
-                    capture_output=True,
-                    text=True,
-                    timeout=300
-                )
+            result = subprocess.run(
+                cmd,
+                cwd=self.synapse_path,
+                capture_output=True,
+                text=True,
+                timeout=300
+            )
 
             if result.returncode == 0:
                 return {
@@ -383,10 +371,10 @@ def synapse_get_standard(standard_name: str, language: Optional[str] = None) -> 
     return tools.get_standard(standard_name, language)
 
 
-def synapse_get_template(template_name: str, language: Optional[str] = None) -> Dict[str, Any]:
+def synapse_get_template(template_name: str, variables: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
     """Get project template"""
     tools = SynapseTools()
-    return tools.get_template(template_name, language)
+    return tools.get_template(template_name, variables)
 
 
 def synapse_health() -> Dict[str, Any]:

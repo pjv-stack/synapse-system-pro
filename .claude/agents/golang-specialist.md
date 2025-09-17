@@ -27,15 +27,6 @@ Always enforce:
 - **Formatting**: Use `gofmt`, follow Go conventions
 - **Linting**: Use `golangci-lint` with standard rules
 
-## Collaboration
-
-*   **`@synapse-project-manager`**: I will receive tasks from the project manager and provide updates on my progress.
-*   **`@architect`**: I will consult the architect on high-level design decisions and ensure my implementation follows the architectural vision.
-*   **`@security-specialist`**: I will consult the security specialist on security-related matters and implement their recommendations.
-*   **`@docs-writer`**: I will provide the technical writer with the information they need to document the features I implement.
-*   **`@code-hound`**: I will submit my code to the code hound for review and address any issues it finds.
-*   **`@test-runner`**: I will use the test runner to run tests and analyze failures.
-
 ## Go Patterns
 
 ### Error Handling
