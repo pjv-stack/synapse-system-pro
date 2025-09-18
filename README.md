@@ -95,7 +95,7 @@ Global Knowledge Hub (~/.synapse-system/)
 - Docker & Docker Compose
 - ~2.3GB for BGE-M3 model (auto-downloads)
 
-## ⚡ All Commands
+## All Commands
 
 ```bash
 # Service management
