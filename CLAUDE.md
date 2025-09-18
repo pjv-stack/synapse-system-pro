@@ -6,14 +6,14 @@ This file provides guidance to Claude Code when working with the Synapse System.
 
 ```bash
 # Start synapse services
-~/.synapse-system/synapse start
+synapse start
 
 # Initialize project with agents
 cd your-project/
-~/.synapse-system/synapse init .
+synapse init .
 
 # Search knowledge base
-~/.synapse-system/synapse search "query terms"
+synapse search "query terms"
 ```
 
 ## System Overview
@@ -25,15 +25,18 @@ Synapse System combines Neo4j knowledge graphs, Redis caching, and BGE-M3 vector
 ### Synapse CLI
 ```bash
 # Start/stop services
-~/.synapse-system/synapse start
-~/.synapse-system/synapse stop
-~/.synapse-system/synapse status
+synapse start
+synapse stop
+synapse status
 
 # Search global knowledge
-~/.synapse-system/synapse search "rust error handling"
+synapse search "rust error handling"
 
 # Initialize project with language-specific agents
-~/.synapse-system/synapse init [directory]
+synapse init [directory]
+
+# Update project agents
+synapse update [directory]
 ```
 
 ### Legacy Commands
@@ -47,7 +50,7 @@ cd ~/.synapse-system/.synapse/neo4j && source .venv/bin/activate && python inges
 
 ## Project Integration
 
-After running `synapse.sh init`, projects get:
+After running `synapse init`, projects get:
 - `.claude/agents/language-specialist.md` (rust, typescript, golang, python)
 - `.claude/agents/synapse-project-manager.md` (universal)
 - `.synapse.yml` (project config)

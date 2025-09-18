@@ -8,25 +8,28 @@ echo
 echo "The setup system has been simplified!"
 echo
 echo "📦 For global services:"
-echo "  ~/.synapse-system/synapse start"
+echo "  synapse start"
 echo
 echo "🛠️  For project setup:"
-echo "  ~/.synapse-system/synapse init ."
+echo "  synapse init ."
 echo
 echo "📚 For searching knowledge:"
-echo "  ~/.synapse-system/synapse search \"query\""
+echo "  synapse search \"query\""
+echo
+echo "🔄 For project updates:"
+echo "  synapse update"
 echo
 echo "✨ Full usage:"
-echo "  ~/.synapse-system/synapse.sh help"
+echo "  synapse --help"
 echo
 
 # If a directory is provided, initialize it
 if [[ -n "$1" ]] && [[ -d "$1" ]]; then
     echo "🔧 Initializing project: $1"
-    exec ~/.synapse-system/synapse init "$1"
+    exec ~/.synapse-system/bin/synapse init "$1"
 elif [[ -n "$1" ]]; then
     echo "❌ Directory not found: $1"
     exit 1
 else
-    echo "💡 To setup current directory: ~/.synapse-system/synapse init ."
+    echo "💡 To setup current directory: synapse init ."
 fi
