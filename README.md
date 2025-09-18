@@ -1,10 +1,10 @@
 # Synapse System
 
-A hybrid intelligence framework that provides AI agents with persistent memory, semantic search, and project-aware context through Neo4j knowledge graphs, Redis caching, and BGE-M3 vector embeddings.
+A framework that provides AI agents with persistent memory, semantic search, and project aware context through Neo4j knowledge graphs, Redis caching, and BGE-M3 vector embeddings.
 
 ## What is Synapse System?
 
-Synapse transforms how AI agents work with codebases by providing:
+Synapse provides:
 
 - **Persistent Memory**: Knowledge that survives across sessions
 - **Semantic Understanding**: Deep contextual awareness using BGE-M3 embeddings
@@ -12,7 +12,7 @@ Synapse transforms how AI agents work with codebases by providing:
 - **Smart Updates**: Version tracking and agent update system
 - **Unified CLI**: Single `synapse` command for all functionality
 
-## ⚡ Quick Start
+## Quick Start
 
 ```bash
 # 1. Start synapse services
@@ -26,7 +26,7 @@ synapse init .
 synapse search "rust error handling"
 ```
 
-## 🎯 Features
+## Features
 
 - **Language Detection**: Auto-detects Rust, Go, TypeScript, Python, Zig, C
 - **Intelligent Search**: Intent-aware with query expansion and smart ranking
@@ -35,7 +35,7 @@ synapse search "rust error handling"
 - **Flexible Deployment**: Copy agents (stable) or symlink (auto-update)
 - **Integrity Checks**: Verify agents haven't been corrupted
 
-## 📁 What Gets Created
+##  What Gets Created
 
 After `synapse init`, your project has:
 
@@ -50,7 +50,7 @@ project/
 └── .synapse.yml                # Configuration & versions
 ```
 
-## 🤖 Using with Claude Code
+##  Using with Claude Code
 
 ```
 @synapse-project-manager help me implement feature X following best practices
@@ -58,7 +58,7 @@ project/
 @code-hound review my code for quality issues
 ```
 
-## 🔧 Architecture
+##  Architecture
 
 ```
 Global Knowledge Hub (~/.synapse-system/)
@@ -76,20 +76,20 @@ Global Knowledge Hub (~/.synapse-system/)
 - **Redis**: Query cache (localhost:6379)
 - **BGE-M3**: 1024-dimensional semantic vectors
 
-## 📚 Documentation
+##  Documentation
 
 - **[USAGE_GUIDE.md](USAGE_GUIDE.md)** - Complete user guide with all commands
 - **[DEVELOPMENT.md](DEVELOPMENT.md)** - Technical architecture and development
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history and changes
 
-## 💡 Use Cases
+##  Use Cases
 
 - **Code Review**: AI agents understand your project's patterns
-- **Feature Implementation**: Context-aware suggestions that fit your architecture
+- **Feature Implementation**: Context aware suggestions that fit your architecture
 - **Knowledge Retention**: Team wisdom persists across projects
 - **Onboarding**: New developers get AI assistance trained on your codebase
 
-## 🛠️ System Requirements
+##  System Requirements
 
 - Python 3.12+ with `uv` package manager
 - Docker & Docker Compose
@@ -116,7 +116,7 @@ synapse manifest list/verify/info
 synapse health
 ```
 
-## 🔄 Updates
+##  Updates
 
 Keep your projects current:
 
@@ -128,4 +128,4 @@ synapse update -y       # Auto-approve updates
 
 ---
 
-**Ready to start?** See the [USAGE_GUIDE.md](USAGE_GUIDE.md) for detailed instructions.
+See the [USAGE_GUIDE.md](USAGE_GUIDE.md) for instructions.
