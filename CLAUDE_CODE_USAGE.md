@@ -189,7 +189,7 @@ If language detection fails, check for language indicator files:
 ### Re-initialize Project
 ```bash
 # If setup didn't work correctly
-~/.synapse-system/synapse init . --force
+~/.synapse-system/synapse.sh init . --force
 ```
 
 This integration transforms Claude Code from a general-purpose coding assistant into a language-aware, context-rich development partner that understands both your specific project and the broader conventions of your chosen programming language.

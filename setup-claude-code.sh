@@ -12,7 +12,7 @@ echo
 
 # Delegate to the new simple system
 if [[ -n "$1" ]]; then
-    exec ~/.synapse-system/synapse init "$1"
+    exec ~/.synapse-system/synapse.sh init "$1"
 else
     exec ~/.synapse-system/synapse init .
 fi

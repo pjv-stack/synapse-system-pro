@@ -17,7 +17,7 @@ echo "📚 For searching knowledge:"
 echo "  ~/.synapse-system/synapse search \"query\""
 echo
 echo "✨ Full usage:"
-echo "  ~/.synapse-system/synapse help"
+echo "  ~/.synapse-system/synapse.sh help"
 echo
 
 # If a directory is provided, initialize it

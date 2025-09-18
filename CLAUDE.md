@@ -47,7 +47,7 @@ cd ~/.synapse-system/.synapse/neo4j && source .venv/bin/activate && python inges
 
 ## Project Integration
 
-After running `synapse init`, projects get:
+After running `synapse.sh init`, projects get:
 - `.claude/agents/language-specialist.md` (rust, typescript, golang, python)
 - `.claude/agents/synapse-project-manager.md` (universal)
 - `.synapse.yml` (project config)
@@ -88,4 +88,4 @@ Follows the Numogrammatic Codex:
 - **TDD**: Test-driven development
 - **Five Whys**: Root cause analysis
 
-For detailed setup instructions, see SETUP_GUIDE.md
+For detailed setup instructions, see SETUP_GUIDE.mdIDE.md

@@ -71,7 +71,7 @@ Project Integration
 ├── instructions/               # How-to guides and patterns
 ├── standards/                  # Coding conventions
 ├── templates/                  # Project boilerplate
-└── synapse                     # Unified CLI tool
+└── synapse.sh                  # Unified CLI tool
 ```
 
 ### Service Infrastructure
@@ -97,11 +97,11 @@ Following the **Numogrammatic Codex**:
 ### Quick Setup
 ```bash
 # Start the system
-~/.synapse-system/synapse start
+~/.synapse-system/synapse.sh start
 
 # Initialize your project
 cd your-project/
-~/.synapse-system/synapse init .
+~/.synapse-system/synapse.sh init .
 
 # Use with Claude Code
 @synapse-project-manager help with this project
