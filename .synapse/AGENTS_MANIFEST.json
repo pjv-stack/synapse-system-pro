@@ -1,8 +1,8 @@
 {
   "manifest_version": "1.0",
-  "generated_at": "2025-09-18T14:04:41.130545",
+  "generated_at": "2025-09-18T16:32:58.004890",
   "synapse_version": "2024.1.0",
-  "agent_count": 16,
+  "agent_count": 15,
   "agents": {
     "rust-specialist": {
       "name": "rust-specialist",
@@ -109,22 +109,6 @@
       "checksum": "cab19c3e72158d10cc74ce4d0f532cc1",
       "version": "1758105193.cab19c3e"
     },
-    "planner": {
-      "name": "planner",
-      "description": "High-level planner and orchestrator for the AI team.",
-      "tools": [
-        "Read",
-        "Grep",
-        "Glob",
-        "Write",
-        "Bash",
-        "SynapseSearch"
-      ],
-      "size_bytes": 2954,
-      "modified_time": "2025-09-17T21:03:00.107465",
-      "checksum": "40aa843b49c83c163c4dca73f4751250",
-      "version": "1758106980.40aa843b"
-    },
     "synapse-project-manager": {
       "name": "synapse-project-manager",
       "description": "Enhanced project manager with Synapse System integration for language-aware task management and knowledge retrieval.",
@@ -139,10 +123,10 @@
         "SynapseTemplate",
         "SynapseHealth"
       ],
-      "size_bytes": 10382,
-      "modified_time": "2025-09-17T20:37:10.287712",
-      "checksum": "ca551cb5f1c1d23eb696a94d9d4b63ce",
-      "version": "1758105430.ca551cb5"
+      "size_bytes": 14139,
+      "modified_time": "2025-09-18T16:25:00.896120",
+      "checksum": "5d24c35990e8ec4aea06034177abc44e",
+      "version": "1758176700.5d24c359"
     },
     "architect": {
       "name": "architect",

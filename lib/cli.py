@@ -19,6 +19,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 from project import ProjectManager
 from updater import UpdateManager
 from version_manager import VersionManager
+from orchestration import TaskOrchestrator
+from task_state import TaskTracker, TaskState
 
 
 class SynapseCLI:
@@ -30,6 +32,8 @@ class SynapseCLI:
         self.project_manager = ProjectManager(self.synapse_home)
         self.update_manager = UpdateManager(self.synapse_home)
         self.version_manager = VersionManager(self.synapse_home)
+        self.orchestrator = TaskOrchestrator(self.synapse_home)
+        self.task_tracker = TaskTracker(self.synapse_home)
 
         # Auto-detect current project context
         self.current_project = self._find_project_root()
@@ -375,6 +379,180 @@ class SynapseCLI:
             print(f"❌ Unknown manifest action: {args.manifest_action}")
             return 1
 
+    def cmd_workflow(self, args) -> int:
+        """Manage and execute workflows"""
+        if args.workflow_action == "list":
+            workflows = self.orchestrator.list_available_workflows()
+            if not workflows:
+                print("No workflows available")
+                return 0
+
+            print("📋 Available Workflows:")
+            print("=" * 50)
+            for workflow in workflows:
+                print(f"• {workflow['id']:<20} {workflow['name']}")
+                print(f"  {workflow['description']}")
+                print(f"  Type: {workflow['type']:<15} Duration: ~{workflow['estimated_duration']//60}min")
+                print()
+            return 0
+
+        elif args.workflow_action == "execute":
+            if not args.request:
+                print("❌ Request description required for workflow execution")
+                print("Usage: synapse workflow execute \"implement user authentication\"")
+                return 1
+
+            # Detect language from current project
+            language = None
+            if self.current_project:
+                config = self.project_manager.load_project_config(self.current_project)
+                if config:
+                    language = config.get('language')
+
+            if not language and args.language:
+                language = args.language
+
+            print(f"🎯 Executing workflow for: {args.request}")
+            if language:
+                print(f"🔧 Language context: {language}")
+
+            try:
+                # Decompose request into workflow
+                workflow = self.orchestrator.decompose_request(args.request, language)
+                print(f"📋 Created workflow: {workflow.name}")
+                print(f"📊 Estimated duration: {workflow.estimated_total_duration // 60} minutes")
+                print(f"🔄 Phases: {len(workflow.phases)}")
+
+                if not args.yes:
+                    response = input("\nExecute this workflow? [y/N]: ")
+                    if response.lower() not in ['y', 'yes']:
+                        print("Workflow cancelled")
+                        return 0
+
+                # Execute workflow (placeholder - would be async in real implementation)
+                print("\n🚀 Executing workflow...")
+                print("⚠️  Note: This is a preview - actual agent execution not yet implemented")
+
+                # Show workflow structure
+                for i, phase in enumerate(workflow.phases, 1):
+                    print(f"\nPhase {i}: {phase.name}")
+                    for task in phase.tasks:
+                        print(f"  • {task.agent}: {task.description}")
+
+                print("\n✅ Workflow structure created successfully!")
+                print("🔜 Agent execution will be implemented in the next phase")
+                return 0
+
+            except Exception as e:
+                print(f"❌ Workflow execution failed: {e}")
+                return 1
+
+        elif args.workflow_action == "status":
+            # Show active workflows and their status
+            print("📊 Workflow Status:")
+            print("=" * 30)
+            print("🔜 Workflow status tracking will be implemented in next phase")
+            return 0
+
+        elif args.workflow_action == "create":
+            if not args.workflow_file:
+                print("❌ Workflow file required")
+                print("Usage: synapse workflow create my-workflow.yml")
+                return 1
+
+            print(f"🛠️  Creating custom workflow from: {args.workflow_file}")
+            print("🔜 Custom workflow creation will be implemented in next phase")
+            return 0
+
+        else:
+            print(f"❌ Unknown workflow action: {args.workflow_action}")
+            return 1
+
+    def cmd_tasks(self, args) -> int:
+        """Manage tasks and task state"""
+        if args.task_action == "list":
+            state_filter = None
+            if args.state:
+                try:
+                    state_filter = TaskState(args.state.upper())
+                except ValueError:
+                    print(f"❌ Invalid state: {args.state}")
+                    print(f"Valid states: {', '.join([s.value for s in TaskState])}")
+                    return 1
+
+            if state_filter:
+                tasks = self.task_tracker.get_tasks_by_state(state_filter)
+                print(f"📋 Tasks in {state_filter.value} state:")
+            else:
+                # Get ready tasks by default
+                tasks = self.task_tracker.get_ready_tasks()
+                print("📋 Ready to execute tasks:")
+
+            if not tasks:
+                print("No tasks found")
+                return 0
+
+            print("=" * 60)
+            for task in tasks:
+                print(f"• {task.id[:8]} | {task.agent:<20} | {task.action}")
+                print(f"  {task.description}")
+                print(f"  State: {task.state.value} | Priority: {task.priority.value}")
+                print()
+
+            return 0
+
+        elif args.task_action == "show":
+            if not args.task_id:
+                print("❌ Task ID required")
+                return 1
+
+            task = self.task_tracker.get_task(args.task_id)
+            if not task:
+                print(f"❌ Task not found: {args.task_id}")
+                return 1
+
+            print(f"📄 Task Details: {task.id}")
+            print("=" * 40)
+            print(f"Agent: {task.agent}")
+            print(f"Action: {task.action}")
+            print(f"Description: {task.description}")
+            print(f"State: {task.state.value}")
+            print(f"Priority: {task.priority.value}")
+            print(f"Created: {task.created_at}")
+            print(f"Updated: {task.updated_at}")
+
+            if task.dependencies:
+                print(f"Dependencies: {', '.join(task.dependencies)}")
+
+            if task.error:
+                print(f"Error: {task.error}")
+
+            return 0
+
+        elif args.task_action == "history":
+            if not args.task_id:
+                print("❌ Task ID required")
+                return 1
+
+            history = self.task_tracker.get_task_history(args.task_id)
+            if not history:
+                print(f"❌ No history found for task: {args.task_id}")
+                return 1
+
+            print(f"📜 Task History: {args.task_id}")
+            print("=" * 50)
+            for entry in history:
+                prev = entry.previous_state.value if entry.previous_state else "None"
+                print(f"{entry.timestamp} | {prev} → {entry.new_state.value} | {entry.agent}")
+                if entry.notes:
+                    print(f"  Notes: {entry.notes}")
+
+            return 0
+
+        else:
+            print(f"❌ Unknown task action: {args.task_action}")
+            return 1
+
 
 def main():
     """Main CLI entry point"""
@@ -433,6 +611,20 @@ def main():
     manifest_parser = subparsers.add_parser("manifest", help="Manage agent manifest")
     manifest_parser.add_argument("manifest_action", choices=["update", "verify", "list", "info"])
     manifest_parser.add_argument("agent", nargs="?", help="Agent name (for verify/info)")
+
+    # Workflow management
+    workflow_parser = subparsers.add_parser("workflow", help="Manage and execute workflows")
+    workflow_parser.add_argument("workflow_action", choices=["list", "execute", "status", "create"])
+    workflow_parser.add_argument("request", nargs="?", help="Request description (for execute)")
+    workflow_parser.add_argument("--language", help="Programming language context")
+    workflow_parser.add_argument("--workflow-file", help="Workflow file (for create)")
+    workflow_parser.add_argument("-y", "--yes", action="store_true", help="Auto-confirm execution")
+
+    # Task management
+    task_parser = subparsers.add_parser("tasks", help="Manage tasks and task state")
+    task_parser.add_argument("task_action", choices=["list", "show", "history"])
+    task_parser.add_argument("--state", help="Filter tasks by state")
+    task_parser.add_argument("--task-id", help="Task ID (for show/history)")
 
     args = parser.parse_args()
 
