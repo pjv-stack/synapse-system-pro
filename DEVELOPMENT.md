@@ -64,7 +64,7 @@ Technical documentation for understanding, extending, and contributing to the Sy
 │   └── version_manager.py        # Version tracking
 ├── .synapse/                     # Core system
 │   ├── neo4j/                    # Knowledge engine
-│   │   ├── context_manager.py    # Hybrid search API
+│   │   ├── context_manager.py    # Enhanced search API with intent classification
 │   │   ├── vector_engine.py      # BGE-M3 embeddings
 │   │   ├── ingestion.py          # Knowledge ingestion
 │   │   ├── synapse_search.py     # Search interface

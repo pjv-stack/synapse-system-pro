@@ -29,6 +29,7 @@ synapse search "rust error handling"
 ## 🎯 Features
 
 - **Language Detection**: Auto-detects Rust, Go, TypeScript, Python, Zig, C
+- **Intelligent Search**: Intent-aware with query expansion and smart ranking
 - **Smart Agents**: Context-aware AI agents with project knowledge
 - **Update System**: `synapse update` keeps projects current
 - **Flexible Deployment**: Copy agents (stable) or symlink (auto-update)

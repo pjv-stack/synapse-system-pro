@@ -337,11 +337,15 @@ Example: `1758107914.627812e8`
 ### Global Knowledge Search
 
 ```bash
-# Search patterns and examples
-synapse search "rust async patterns"
-synapse search "error handling best practices"
-synapse search "testing strategies golang"
-synapse search "React component patterns"
+# Enhanced search with intelligent query processing
+synapse search "rust error handling"          # Auto-detects debugging intent
+synapse search "how to implement async"       # Detects implementation intent
+synapse search "python test coverage"         # Detects testing intent
+synapse search "optimize database queries"    # Detects optimization intent
+
+# Fuzzy search handles typos
+synapse search "errror handeling"            # Still finds error handling
+synapse search "authentiction securityy"      # Finds authentication security
 ```
 
 ### Standards and Templates
