@@ -1,5 +1,134 @@
 # Changelog
 
+## [2024.1.3] - Context Augmentation and System Diagnostics
+
+Enhanced Synapse System with project-specific context loading and comprehensive health diagnostics.
+
+### ✨ Added
+
+**🩺 System Health Diagnostics:**
+- **`synapse doctor` command**: Comprehensive system health checks with actionable fix suggestions
+- **Multi-component validation**: Neo4j, Redis, Docker, virtual environment, and project configuration checks
+- **Intelligent error reporting**: Distinguishes between critical failures and informational warnings
+- **Context-aware diagnostics**: Different behavior when run in project vs non-project directories
+
+**📁 Project Context Augmentation:**
+- **Context directory creation**: `synapse init` now creates `.synapse/context/` directory for project-specific information
+- **Context loading mechanism**: New `get_project_context()` method in ProjectManager to load and concatenate context files
+- **Agent context integration**: Updated synapse-project-manager agent to automatically consider project-specific context
+- **Markdown-based context**: Support for multiple `.md` files in context directory with automatic concatenation
+
+**🧪 Enhanced Testing Infrastructure:**
+- **Context augmentation tests**: Comprehensive test suite for context directory creation and loading
+- **Health check tests**: Full test coverage for `synapse doctor` command including success and failure scenarios
+- **Mock-based testing**: Robust testing using mocks for external dependencies (Redis, Neo4j, Docker)
+
+### 🔄 Changed
+
+**🔧 Project Initialization:**
+- **Enhanced directory structure**: Projects now include `.synapse/context/` directory alongside `.claude/agents/`
+- **Context-aware agents**: Project manager agent now prioritizes project-specific context over general standards
+- **Improved project validation**: Better error handling and validation during project setup
+
+**💊 Error Handling:**
+- **Graceful Redis handling**: `synapse doctor` handles missing Redis Python module without false failures
+- **Informative diagnostics**: Clear distinction between missing dependencies and actual service failures
+- **Comprehensive fix suggestions**: Each diagnostic issue includes specific remediation steps
+
+### 🛠️ Technical Details
+
+**Context Loading Algorithm:**
+1. Scan `.synapse/context/` directory for `*.md` files
+2. Sort files alphabetically for consistent ordering
+3. Concatenate content with clear file headers
+4. Handle read errors gracefully without stopping execution
+5. Return formatted context with project-specific header
+
+**Health Check Components:**
+- **Neo4j connectivity**: Uses existing `_check_services()` method
+- **Redis connectivity**: Handles ImportError for missing redis module
+- **Project configuration**: Validates `.synapse.yml` existence and structure
+- **Docker environment**: Verifies Docker installation and accessibility
+- **Virtual environment**: Checks Neo4j Python virtual environment
+- **BGE-M3 model cache**: Validates HuggingFace model cache directory
+
+**Agent Enhancement:**
+- Added project context section to synapse-project-manager.md
+- Instructions for loading and considering `.synapse/context/` files
+- Priority system: project context overrides general standards
+- Integration guidance for context-aware decision making
+
+### 📦 New Files
+
+- `tests/test_doctor.py`: Comprehensive test suite for health diagnostics
+- `tests/test_context.py`: Test suite for context augmentation functionality
+- Enhanced `lib/cli.py`: Added `cmd_doctor` method with 6 health checks
+- Enhanced `lib/project.py`: Added `get_project_context` method and context directory creation
+
+### 🎯 Usage Examples
+
+**Health Diagnostics:**
+```bash
+synapse doctor                    # Run comprehensive health check
+# ✅ All systems healthy! or ⚠️ Some issues detected
+```
+
+**Project Context:**
+```bash
+synapse init .                    # Creates .synapse/context/ directory
+echo "# API Schema" > .synapse/context/api.md
+@synapse-project-manager          # Agent will automatically load context
+```
+
+## [2024.1.2] - Comprehensive Test Suite
+
+Major testing infrastructure implementation with containerized testing environment.
+
+### ✨ Added
+
+**🧪 Test Infrastructure:**
+- **requirements-dev.txt**: Development dependencies for testing (pytest, pytest-snapshot, testcontainers)
+- **Test directory structure**: Organized `/tests/` directory with snapshots support
+- **Testcontainers integration**: Isolated Redis and Neo4j containers for testing
+
+**🔧 Test Fixtures:**
+- **redis_container**: Session-scoped Redis container with automatic setup/teardown
+- **neo4j_container**: Session-scoped Neo4j container with authentication and cleanup
+- **redis_client**: Function-scoped Redis client with automatic data flushing
+- **neo4j_session**: Function-scoped Neo4j session with database clearing
+- **cli_runner**: CLI command execution fixture with timeout and error handling
+
+**🧩 Integration Tests:**
+- **test_synapse_init**: Verifies project initialization creates `.synapse.yml` and agent files
+- **test_manifest_list_snapshot**: Snapshot testing for consistent manifest output
+- **CLI testing framework**: Subprocess-based CLI execution with result capture
+
+### 🔄 Changed
+
+**📁 Project Structure:**
+- Added `/tests/` directory for all test files
+- Added `/tests/snapshots/` for snapshot test data
+- Enhanced development workflow with testing capabilities
+
+**🔧 Testing Features:**
+- **Isolated environments**: Each test runs in clean containers
+- **Snapshot testing**: Consistent output verification for CLI commands
+- **Comprehensive coverage**: Tests for initialization, manifest, and CLI operations
+- **Error handling**: Robust test fixtures with timeout and exception management
+
+### 🛠️ Technical Details
+
+**Container Management:**
+- Redis 7 Alpine for caching tests
+- Neo4j 5.13 for graph database tests
+- Automatic container lifecycle management
+- Connection verification and cleanup
+
+**Test Organization:**
+- `conftest.py`: Centralized fixtures and test configuration
+- `test_cli.py`: CLI integration tests
+- `CLIResult`: Named tuple for structured command result handling
+
 ## [2024.1.1] - Enhanced Search System
 
 Enhanced search capabilities with intelligent query processing and improved relevance.

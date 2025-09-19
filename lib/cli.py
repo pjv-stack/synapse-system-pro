@@ -169,6 +169,94 @@ class SynapseCLI:
 
         return 0
 
+    def cmd_doctor(self, args) -> int:
+        """Run comprehensive system health checks"""
+        print("🩺 Synapse Doctor - System Health Check")
+        print("=" * 50)
+
+        all_healthy = True
+
+        # Check 1: Neo4j connectivity
+        print("\n1. Neo4j Database:")
+        if self._check_services():
+            print("   ✅ Neo4j is running on http://localhost:7474")
+        else:
+            print("   ❌ Neo4j is not responding")
+            print("   💊 Fix: Run 'synapse start' to start services")
+            all_healthy = False
+
+        # Check 2: Redis connectivity
+        print("\n2. Redis Cache:")
+        try:
+            import redis
+            r = redis.Redis(host='localhost', port=6379, socket_timeout=2)
+            r.ping()
+            print("   ✅ Redis is running on localhost:6379")
+        except ImportError:
+            print("   ⚠️  Redis module not available in system Python")
+            print("   💊 Info: Redis checks require 'pip install redis' or use neo4j venv")
+        except Exception as e:
+            print("   ❌ Redis is not responding")
+            print("   💊 Fix: Run 'synapse start' to start services")
+            all_healthy = False
+
+        # Check 3: Project configuration
+        print("\n3. Project Configuration:")
+        if self.current_project:
+            synapse_yml = self.current_project / ".synapse.yml"
+            if synapse_yml.exists():
+                print(f"   ✅ Synapse project found at {self.current_project}")
+                config = self.project_manager.load_project_config(self.current_project)
+                if config:
+                    print(f"      Language: {config.get('language', 'unknown')}")
+                    print(f"      Version: {config.get('synapse_version', 'unknown')}")
+            else:
+                print("   ⚠️  Project directory exists but .synapse.yml missing")
+                print("   💊 Fix: Run 'synapse init .' to initialize project")
+                all_healthy = False
+        else:
+            print("   ℹ️  No synapse project in current directory")
+            print("   💊 Fix: Run 'synapse init .' to create a new project")
+
+        # Check 4: Docker availability
+        print("\n4. Docker Environment:")
+        try:
+            result = subprocess.run(["docker", "--version"],
+                                  capture_output=True, check=True)
+            print("   ✅ Docker is installed and available")
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            print("   ❌ Docker is not installed or not accessible")
+            print("   💊 Fix: Install Docker from https://docs.docker.com/get-docker/")
+            all_healthy = False
+
+        # Check 5: Virtual environment
+        print("\n5. Neo4j Virtual Environment:")
+        venv_python = self.neo4j_dir / ".venv" / "bin" / "python"
+        if venv_python.exists():
+            print("   ✅ Python virtual environment is configured")
+        else:
+            print("   ❌ Python virtual environment not found")
+            print("   💊 Fix: Re-run setup script or check installation")
+            all_healthy = False
+
+        # Check 6: BGE-M3 model (if search functionality required)
+        print("\n6. BGE-M3 Model:")
+        model_cache = Path.home() / ".cache" / "huggingface"
+        if model_cache.exists():
+            print("   ✅ Model cache directory exists")
+        else:
+            print("   ⚠️  Model cache not found (will download on first use)")
+            print("   💊 Info: ~2.3GB download required on first search")
+
+        # Summary
+        print("\n" + "=" * 50)
+        if all_healthy:
+            print("✅ All systems healthy!")
+            return 0
+        else:
+            print("⚠️  Some issues detected. See fixes above.")
+            return 1
+
     def cmd_search(self, args) -> int:
         """Search global knowledge base"""
         if not args.query:
@@ -569,6 +657,7 @@ def main():
     subparsers.add_parser("start", help="Start synapse services")
     subparsers.add_parser("stop", help="Stop synapse services")
     subparsers.add_parser("status", help="Check system status")
+    subparsers.add_parser("doctor", help="Run comprehensive system health checks")
 
     # Core functionality
     search_parser = subparsers.add_parser("search", help="Search global knowledge")

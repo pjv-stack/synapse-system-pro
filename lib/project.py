@@ -144,6 +144,11 @@ class ProjectManager:
         agents_dir = claude_dir / "agents"
         agents_dir.mkdir(parents=True, exist_ok=True)
 
+        # Create synapse context directory
+        synapse_dir = project_dir / ".synapse"
+        context_dir = synapse_dir / "context"
+        context_dir.mkdir(parents=True, exist_ok=True)
+
         # Deploy universal agents
         universal_agents = self.get_universal_agents()
         deployed_agents = []
@@ -268,3 +273,34 @@ class ProjectManager:
             results["agents"][agent_name] = agent_info
 
         return results
+
+    def get_project_context(self, project_dir: Path) -> str:
+        """Load and concatenate all context files from .synapse/context/ directory"""
+        context_dir = project_dir / ".synapse" / "context"
+
+        if not context_dir.exists():
+            return ""
+
+        context_parts = []
+
+        # Find all markdown files in context directory
+        context_files = sorted(context_dir.glob("*.md"))
+
+        if not context_files:
+            return ""
+
+        for context_file in context_files:
+            try:
+                content = context_file.read_text(encoding='utf-8')
+                # Add file header for clarity
+                context_parts.append(f"## Context from {context_file.name}\n\n{content}")
+            except Exception as e:
+                print(f"Warning: Failed to read context file {context_file}: {e}")
+                continue
+
+        if context_parts:
+            header = "# Project-Specific Context\n\n"
+            header += "The following context information is specific to this project and should be considered when performing any tasks:\n\n"
+            return header + "\n\n---\n\n".join(context_parts)
+
+        return ""
