@@ -4,7 +4,6 @@ Quick guide for using Synapse with your projects.
 
 ## Getting Started
 
-**Already installed?** Skip to [Project Setup](#project-setup)
 
 **Need to install?**
 ```bash

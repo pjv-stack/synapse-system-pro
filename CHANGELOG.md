@@ -1,6 +1,102 @@
 # Changelog
 
-## [2024.1.3] - Context Augmentation and System Diagnostics
+## Installation & Documentation Overhaul
+
+Complete rewrite of installation system and documentation for bulletproof, user-friendly setup experience.
+
+### ✨ Added
+
+**🔧 Enhanced Installation (`install.sh`):**
+- **Auto-fix Docker daemon**: Attempts to start Docker if not running
+- **Docker Compose v2 support**: Detects and uses `docker compose` or `docker-compose`
+- **Smart PATH setup**: Falls back to shell profiles when sudo unavailable
+- **Disk space checking**: Warns about BGE-M3 model download requirements (~3GB)
+- **Post-install verification**: Automatic health check and service startup
+- **Progress indicators**: Clear feedback during long operations
+
+**🩺 Auto-Fix Doctor Command:**
+- **`synapse doctor --fix`**: Automatically resolves common issues
+- **Docker daemon startup**: Auto-starts Docker on Linux systems
+- **Service recovery**: Restarts Neo4j/Redis if not responding
+- **Project initialization**: Auto-runs `synapse init` for broken projects
+- **Intelligent error handling**: Specific fixes for each failure type
+
+**📥 BGE-M3 Download Experience:**
+- **Progress indicators**: Visual feedback during 2.3GB model download
+- **Cache detection**: Skips download if model already exists
+- **Clear messaging**: Shows download size and expected time
+- **Graceful fallback**: Better error handling with specific fixes
+
+**🚀 Enhanced CLI Commands:**
+- **Improved `synapse start`**: Port conflict detection, better Docker handling
+- **Robust error messages**: Every error includes exact fix command
+- **Auto-retry logic**: Handles temporary network/service issues
+- **Health validation**: Verifies services actually respond after startup
+
+### 🔄 Changed
+
+**📚 Documentation Rewrite:**
+- **README.md**: Reduced from verbose to 2-line installation process
+- **USAGE_GUIDE.md**: Streamlined from 500+ to ~125 lines, focuses on essentials
+- **SETUP_GUIDE.md**: Emphasizes one-command setup and auto-fix features
+- **Beginner-friendly**: Removed technical jargon, clear action steps
+
+**⚡ Installation Flow:**
+- **One command setup**: `./install.sh` handles everything automatically
+- **No manual steps**: Services start automatically after installation
+- **Graceful failures**: Every error provides specific next steps
+- **PATH flexibility**: Works with or without sudo access
+
+**🛠️ Error Handling:**
+- **Specific install commands**: Shows exact commands for different platforms
+- **Auto-detection**: Detects shell type (bash/zsh/fish) for PATH setup
+- **Service validation**: Tests that services actually work, not just start
+- **Recovery guidance**: Clear next steps when auto-fix fails
+
+### 🎯 User Experience
+
+**Before this release:**
+- Complex multi-step installation
+- Manual Docker/service management
+- Generic error messages
+- Documentation scattered across multiple files
+
+**After this release:**
+- Single command: `./install.sh`
+- Automatic service management
+- Specific error fixes: `synapse doctor --fix`
+- Concise, actionable documentation
+
+### 📦 Technical Details
+
+**Installation Improvements:**
+- Auto-detects and starts Docker daemon via systemctl
+- Supports both docker-compose v1 and v2
+- Handles non-sudo users with shell profile PATH setup
+- Validates disk space before BGE-M3 download
+- Tests service connectivity after startup
+
+**Doctor Command Features:**
+- Systematic health checks: Neo4j, Redis, Docker, venv, project config
+- Auto-fix mode attempts to resolve issues automatically
+- Tracks applied fixes and reports success/failure
+- Provides manual steps when auto-fix impossible
+
+**Error Message Standards:**
+- Every error includes platform-specific install commands
+- Clear distinction between missing tools and broken services
+- Specific next steps: run exact commands to fix issues
+- Points to `synapse doctor --fix` for automated resolution
+
+### 🚀 KISS Principle Applied
+
+Following "Keep It Simple, Stupid":
+- **No new MD files created** - Enhanced existing tools instead
+- **Auto-fix problems** - Don't just report them, solve them
+- **One-command operations** - Reduced friction at every step
+- **Clear next steps** - Every error shows exactly what to run
+
+## Context Augmentation and System Diagnostics
 
 Enhanced Synapse System with project-specific context loading and comprehensive health diagnostics.
 
@@ -80,7 +176,7 @@ echo "# API Schema" > .synapse/context/api.md
 @synapse-project-manager          # Agent will automatically load context
 ```
 
-## [2024.1.2] - Comprehensive Test Suite
+## Comprehensive Test Suite
 
 Major testing infrastructure implementation with containerized testing environment.
 
@@ -129,7 +225,7 @@ Major testing infrastructure implementation with containerized testing environme
 - `test_cli.py`: CLI integration tests
 - `CLIResult`: Named tuple for structured command result handling
 
-## [2024.1.1] - Enhanced Search System
+## Enhanced Search System
 
 Enhanced search capabilities with intelligent query processing and improved relevance.
 
@@ -154,7 +250,7 @@ Enhanced search capabilities with intelligent query processing and improved rele
 - 25% better accuracy from intent-aware ranking
 - 20% better typo tolerance with fuzzy fallback
 
-## [2024.1.0] - Unified CLI and Update System
+## Unified CLI and Update System
 
 Major release introducing unified command interface and intelligent update system.
 
@@ -235,7 +331,7 @@ Major release introducing unified command interface and intelligent update syste
 - `lib/version_manager.py`: Agent versioning, manifest, and integrity checks
 
 **Version Schema:**
-- System version: Semantic versioning (e.g., `2024.1.0`)
+- System version: Semantic versioning (e.g., `v2025.1.0`)
 - Agent versions: `{timestamp}.{checksum}` (e.g., `1758107914.627812e8`)
 - Project tracking: Individual agent versions in `.synapse.yml`
 
@@ -271,7 +367,7 @@ synapse init . --link
 
 ---
 
-## [2025-09-17] - System Refactoring and Enhancement
+## System Refactoring and Enhancement
 
 This release includes a major refactoring of the Synapse agent system, as well as several new features and improvements.
 

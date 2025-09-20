@@ -9,10 +9,9 @@ Give your AI assistant a memory that remembers your coding patterns, project str
 git clone https://github.com/your-repo/synapse-system.git ~/.synapse-system
 cd ~/.synapse-system && ./install.sh
 
-# 2. That's it! Installation starts services automatically
 ```
 
-**Requirements:** Python 3.12+, Docker running
+**Requirements:** Python 3.12+, Docker 
 
 **First run takes ~5 minutes** (downloads AI model), then it's instant.
 
@@ -23,7 +22,7 @@ cd ~/.synapse-system && ./install.sh
 cd my-project/
 synapse init .
 
-# Now use with Claude Code
+# Now use with Claude Code (examples)
 @synapse-project-manager help me implement user authentication
 @rust-specialist write error handling following our patterns
 ```
@@ -55,4 +54,5 @@ synapse status          # Check if everything's running
 - **Specialized Agents** - Language experts (Rust, TypeScript, Go, Python) with context
 - **Smart Caching** (Redis) - Fast access to frequently used patterns
 
-**Need Help?** Check [USAGE_GUIDE.md](USAGE_GUIDE.md) for detailed examples.
+**Need Help?**
+Check [USAGE_GUIDE.md](USAGE_GUIDE.md) for detailed examples.
