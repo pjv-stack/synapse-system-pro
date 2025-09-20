@@ -84,28 +84,73 @@ class SynapseCLI:
 
         # Check if Docker is available
         try:
-            subprocess.run(["docker", "--version"],
-                         capture_output=True, check=True)
+            subprocess.run(["docker", "--version"], capture_output=True, check=True)
         except (subprocess.CalledProcessError, FileNotFoundError):
-            print("❌ Docker is required but not installed")
+            print("❌ Docker is not installed. Get it from: https://docs.docker.com/get-docker/")
             return 1
 
-        # Start services via docker-compose
+        # Check if Docker daemon is running
+        try:
+            subprocess.run(["docker", "info"], capture_output=True, check=True)
+        except subprocess.CalledProcessError:
+            print("❌ Docker daemon is not running")
+            print("💊 Fix: sudo systemctl start docker (Linux) or start Docker Desktop (macOS/Windows)")
+            return 1
+
+        # Check for port conflicts
+        import socket
+        ports_to_check = [7474, 7687, 6379]
+        for port in ports_to_check:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            result = sock.connect_ex(('localhost', port))
+            sock.close()
+            if result == 0:
+                print(f"⚠️  Port {port} is already in use")
+
+        # Try docker-compose first, fallback to docker compose
+        compose_cmd = ["docker-compose"]
+        try:
+            subprocess.run(["docker-compose", "--version"], capture_output=True, check=True)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            try:
+                subprocess.run(["docker", "compose", "version"], capture_output=True, check=True)
+                compose_cmd = ["docker", "compose"]
+            except subprocess.CalledProcessError:
+                print("❌ Neither docker-compose nor 'docker compose' is available")
+                print("💊 Fix: Install Docker Compose")
+                return 1
+
+        # Start services
         try:
             result = subprocess.run(
-                ["docker-compose", "up", "-d"],
+                compose_cmd + ["up", "-d"],
                 cwd=self.neo4j_dir,
                 capture_output=True,
                 text=True
             )
 
             if result.returncode == 0:
-                print("✅ Synapse services started successfully")
-                print("🔗 Neo4j: http://localhost:7474")
-                print("🔗 Redis: localhost:6379")
+                print("✅ Docker services started")
+
+                # Wait for services to be ready
+                print("⏳ Waiting for services to initialize...")
+                import time
+                time.sleep(3)
+
+                # Check if services are responding
+                if self._check_services():
+                    print("✅ Synapse services ready!")
+                    print("🔗 Neo4j: http://localhost:7474")
+                    print("🔗 Redis: localhost:6379")
+                else:
+                    print("⚠️  Services started but may still be initializing")
+                    print("💊 Check status with: synapse status")
+
                 return 0
             else:
-                print(f"❌ Failed to start services: {result.stderr}")
+                print(f"❌ Failed to start services:")
+                print(result.stderr)
+                print("💊 Try: synapse doctor --fix")
                 return 1
 
         except Exception as e:
@@ -171,10 +216,15 @@ class SynapseCLI:
 
     def cmd_doctor(self, args) -> int:
         """Run comprehensive system health checks"""
+        auto_fix = hasattr(args, 'fix') and args.fix
+
         print("🩺 Synapse Doctor - System Health Check")
+        if auto_fix:
+            print("🔧 Auto-fix mode enabled")
         print("=" * 50)
 
         all_healthy = True
+        fixes_applied = []
 
         # Check 1: Neo4j connectivity
         print("\n1. Neo4j Database:")
@@ -182,8 +232,17 @@ class SynapseCLI:
             print("   ✅ Neo4j is running on http://localhost:7474")
         else:
             print("   ❌ Neo4j is not responding")
-            print("   💊 Fix: Run 'synapse start' to start services")
-            all_healthy = False
+            if auto_fix:
+                print("   🔧 Attempting to start services...")
+                if self.cmd_start(None) == 0:
+                    print("   ✅ Services started successfully")
+                    fixes_applied.append("Started Neo4j services")
+                else:
+                    print("   ❌ Failed to start services automatically")
+                    all_healthy = False
+            else:
+                print("   💊 Fix: Run 'synapse start' or 'synapse doctor --fix'")
+                all_healthy = False
 
         # Check 2: Redis connectivity
         print("\n2. Redis Cache:")
@@ -194,14 +253,47 @@ class SynapseCLI:
             print("   ✅ Redis is running on localhost:6379")
         except ImportError:
             print("   ⚠️  Redis module not available in system Python")
-            print("   💊 Info: Redis checks require 'pip install redis' or use neo4j venv")
+            print("   💊 Info: Redis checks require services to be running")
         except Exception as e:
             print("   ❌ Redis is not responding")
-            print("   💊 Fix: Run 'synapse start' to start services")
+            if not auto_fix:
+                print("   💊 Fix: Run 'synapse start' or 'synapse doctor --fix'")
+                all_healthy = False
+
+        # Check 3: Docker environment
+        print("\n3. Docker Environment:")
+        try:
+            subprocess.run(["docker", "--version"], capture_output=True, check=True)
+            print("   ✅ Docker is installed")
+
+            # Check if Docker daemon is running
+            try:
+                subprocess.run(["docker", "info"], capture_output=True, check=True)
+                print("   ✅ Docker daemon is running")
+            except subprocess.CalledProcessError:
+                print("   ❌ Docker daemon is not running")
+                if auto_fix:
+                    print("   🔧 Attempting to start Docker...")
+                    try:
+                        subprocess.run(["sudo", "systemctl", "start", "docker"],
+                                     capture_output=True, check=True)
+                        print("   ✅ Docker daemon started")
+                        fixes_applied.append("Started Docker daemon")
+                    except:
+                        print("   ❌ Failed to start Docker automatically")
+                        print("   💊 Manual fix: sudo systemctl start docker")
+                        all_healthy = False
+                else:
+                    print("   💊 Fix: sudo systemctl start docker")
+                    all_healthy = False
+
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            print("   ❌ Docker is not installed")
+            print("   💊 Fix: Install from https://docs.docker.com/get-docker/")
             all_healthy = False
 
-        # Check 3: Project configuration
-        print("\n3. Project Configuration:")
+        # Check 4: Project configuration
+        print("\n4. Project Configuration:")
         if self.current_project:
             synapse_yml = self.current_project / ".synapse.yml"
             if synapse_yml.exists():
@@ -212,22 +304,20 @@ class SynapseCLI:
                     print(f"      Version: {config.get('synapse_version', 'unknown')}")
             else:
                 print("   ⚠️  Project directory exists but .synapse.yml missing")
-                print("   💊 Fix: Run 'synapse init .' to initialize project")
-                all_healthy = False
+                if auto_fix:
+                    print("   🔧 Initializing synapse project...")
+                    if self.cmd_init(type('Args', (), {'directory': str(self.current_project)})()) == 0:
+                        print("   ✅ Project initialized")
+                        fixes_applied.append("Initialized synapse project")
+                    else:
+                        print("   ❌ Failed to initialize project")
+                        all_healthy = False
+                else:
+                    print("   💊 Fix: Run 'synapse init .' or 'synapse doctor --fix'")
+                    all_healthy = False
         else:
             print("   ℹ️  No synapse project in current directory")
-            print("   💊 Fix: Run 'synapse init .' to create a new project")
-
-        # Check 4: Docker availability
-        print("\n4. Docker Environment:")
-        try:
-            result = subprocess.run(["docker", "--version"],
-                                  capture_output=True, check=True)
-            print("   ✅ Docker is installed and available")
-        except (subprocess.CalledProcessError, FileNotFoundError):
-            print("   ❌ Docker is not installed or not accessible")
-            print("   💊 Fix: Install Docker from https://docs.docker.com/get-docker/")
-            all_healthy = False
+            print("   💊 Info: Run 'synapse init .' to create a new project")
 
         # Check 5: Virtual environment
         print("\n5. Neo4j Virtual Environment:")
@@ -236,25 +326,24 @@ class SynapseCLI:
             print("   ✅ Python virtual environment is configured")
         else:
             print("   ❌ Python virtual environment not found")
-            print("   💊 Fix: Re-run setup script or check installation")
+            print("   💊 Fix: Re-run install.sh or check installation")
             all_healthy = False
-
-        # Check 6: BGE-M3 model (if search functionality required)
-        print("\n6. BGE-M3 Model:")
-        model_cache = Path.home() / ".cache" / "huggingface"
-        if model_cache.exists():
-            print("   ✅ Model cache directory exists")
-        else:
-            print("   ⚠️  Model cache not found (will download on first use)")
-            print("   💊 Info: ~2.3GB download required on first search")
 
         # Summary
         print("\n" + "=" * 50)
+        if fixes_applied:
+            print("🔧 Fixes applied:")
+            for fix in fixes_applied:
+                print(f"   • {fix}")
+            print()
+
         if all_healthy:
             print("✅ All systems healthy!")
             return 0
         else:
-            print("⚠️  Some issues detected. See fixes above.")
+            print("⚠️  Some issues detected.")
+            if not auto_fix:
+                print("💡 Try: synapse doctor --fix")
             return 1
 
     def cmd_search(self, args) -> int:
@@ -657,7 +746,9 @@ def main():
     subparsers.add_parser("start", help="Start synapse services")
     subparsers.add_parser("stop", help="Stop synapse services")
     subparsers.add_parser("status", help="Check system status")
-    subparsers.add_parser("doctor", help="Run comprehensive system health checks")
+
+    doctor_parser = subparsers.add_parser("doctor", help="Run comprehensive system health checks")
+    doctor_parser.add_argument("--fix", action="store_true", help="Automatically fix common issues")
 
     # Core functionality
     search_parser = subparsers.add_parser("search", help="Search global knowledge")

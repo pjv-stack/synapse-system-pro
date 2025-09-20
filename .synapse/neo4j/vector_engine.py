@@ -127,14 +127,46 @@ class VectorEngine:
         """Initialize the sentence-transformers model for BGE-M3"""
         try:
             from sentence_transformers import SentenceTransformer
-            print(f"Loading BGE-M3 model: {self.embedding_model}")
+            import sys
+
+            # Check if model is already cached
+            cache_path = Path.home() / ".cache" / "huggingface" / "hub"
+            model_exists = any("bge-m3" in str(p) for p in cache_path.glob("*") if cache_path.exists())
+
+            if not model_exists:
+                print(f"🔽 Downloading BGE-M3 model (~2.3GB)...")
+                print("⏳ This may take several minutes on first run...")
+
+                # Add progress indication for download
+                print("📥 Progress: ", end="", flush=True)
+
+                # Create a simple progress indicator
+                def progress_callback():
+                    print(".", end="", flush=True)
+
+                # Override the download progress (simple dots)
+                import threading
+                import time
+                progress_thread = threading.Thread(target=lambda: [progress_callback() or time.sleep(5) for _ in range(60)])
+                progress_thread.daemon = True
+                progress_thread.start()
+            else:
+                print(f"📦 Loading cached BGE-M3 model...")
+
             self.transformer_model = SentenceTransformer(self.embedding_model)
-            print("BGE-M3 model loaded successfully.")
+
+            if not model_exists:
+                print("\n✅ BGE-M3 model downloaded and loaded successfully!")
+            else:
+                print("✅ BGE-M3 model loaded from cache.")
+
         except ImportError:
-            print("Error: sentence-transformers not installed. Install with: pip install sentence-transformers")
+            print("❌ sentence-transformers not installed")
+            print("💊 Install with: pip install sentence-transformers")
             self.transformer_model = None
         except Exception as e:
-            print(f"Error loading BGE-M3 model: {e}")
+            print(f"❌ Error loading BGE-M3 model: {e}")
+            print("💊 Try: pip install --upgrade sentence-transformers")
             self.transformer_model = None
 
     def transformer_embedding(self, text: str) -> np.ndarray:
