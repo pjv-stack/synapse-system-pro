@@ -1,8 +1,8 @@
 {
   "manifest_version": "1.0",
-  "generated_at": "2025-09-18T16:32:58.004890",
+  "generated_at": "2025-09-21T19:50:23.566801",
   "synapse_version": "2024.1.0",
-  "agent_count": 15,
+  "agent_count": 16,
   "agents": {
     "rust-specialist": {
       "name": "rust-specialist",
@@ -123,10 +123,10 @@
         "SynapseTemplate",
         "SynapseHealth"
       ],
-      "size_bytes": 14139,
-      "modified_time": "2025-09-18T16:25:00.896120",
-      "checksum": "5d24c35990e8ec4aea06034177abc44e",
-      "version": "1758176700.5d24c359"
+      "size_bytes": 15267,
+      "modified_time": "2025-09-19T19:52:22.171204",
+      "checksum": "e6d74a69ddcf1672a4a785a1f28f2a66",
+      "version": "1758275542.e6d74a69"
     },
     "architect": {
       "name": "architect",
@@ -237,6 +237,15 @@
       "modified_time": "2025-09-17T21:14:09.070530",
       "checksum": "2a0ff8f533b4c2714d7dfe1b50f2b4c4",
       "version": "1758107649.2a0ff8f5"
+    },
+    "4QZero": {
+      "name": "4QZero",
+      "description": "",
+      "tools": [],
+      "size_bytes": 2948,
+      "modified_time": "2025-09-21T19:46:05.555749",
+      "checksum": "ed6bcbc12c724a34ca3d5c6e24804a6f",
+      "version": "1758447965.ed6bcbc1"
     },
     "typescript-specialist": {
       "name": "typescript-specialist",

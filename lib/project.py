@@ -65,7 +65,13 @@ class ProjectManager:
             "code-hound",
             "git-workflow",
             "test-runner",
-            "file-creator"
+            "file-creator",
+            "architect",
+            "devops-engineer",
+            "docs-writer",
+            "security-specialist",
+            "ux-designer",
+            "4QZero"
         ]
 
     def load_project_config(self, project_dir: Path) -> Optional[Dict[str, Any]]:
