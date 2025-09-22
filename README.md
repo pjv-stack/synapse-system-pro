@@ -6,7 +6,7 @@ Give your AI assistant a memory that remembers your coding patterns, project str
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/your-repo/synapse-system.git ~/.synapse-system
+git clone https://github.com/sub0xdai/synapse-system.git ~/.synapse-system
 cd ~/.synapse-system && ./install.sh
 
 ```
