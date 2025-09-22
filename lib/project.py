@@ -74,6 +74,15 @@ class ProjectManager:
             "4QZero"
         ]
 
+    def get_language_specialists(self) -> List[str]:
+        """Get list of all language specialist agents"""
+        return [
+            "rust-specialist",
+            "golang-specialist",
+            "python-specialist",
+            "typescript-specialist"
+        ]
+
     def load_project_config(self, project_dir: Path) -> Optional[Dict[str, Any]]:
         """Load project configuration from .synapse.yml"""
         config_file = project_dir / ".synapse.yml"
@@ -163,9 +172,9 @@ class ProjectManager:
             if self.copy_or_link_agent(agent, project_dir, link_agents):
                 deployed_agents.append(agent)
 
-        # Deploy language-specific agent if available
-        if language not in ["unknown", "generic"]:
-            lang_agent = f"{language}-specialist"
+        # Deploy all language specialist agents
+        language_specialists = self.get_language_specialists()
+        for lang_agent in language_specialists:
             if self.copy_or_link_agent(lang_agent, project_dir, link_agents):
                 deployed_agents.append(lang_agent)
 
@@ -205,8 +214,10 @@ class ProjectManager:
 
         print(f"\n💡 Usage in Claude Code:")
         print(f"   @synapse-project-manager help with this {language} project")
-        if language not in ["unknown", "generic"]:
-            print(f"   @{language}-specialist implement error handling")
+        print(f"   @rust-specialist implement error handling patterns")
+        print(f"   @golang-specialist optimize concurrent operations")
+        print(f"   @python-specialist improve data processing")
+        print(f"   @typescript-specialist create React components")
         print(f"   @code-hound review my code for quality issues")
         print(f"   @git-workflow create feature branch and PR")
 
