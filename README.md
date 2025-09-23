@@ -54,5 +54,11 @@ synapse status          # Check if everything's running
 - **Specialized Agents** - Language experts (Rust, TypeScript, Go, Python) with context
 - **Smart Caching** (Redis) - Fast access to frequently used patterns
 
+#### NEXT
+
+- [ ] Better agents 
+- [ ] Visualize neo4j db 
+
+
 **Need Help?**
 Check [USAGE_GUIDE.md](USAGE_GUIDE.md) for detailed examples.
