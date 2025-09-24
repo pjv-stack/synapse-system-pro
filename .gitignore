@@ -1,0 +1,54 @@
+# Project-specific ignores
+CHANGELOG.md
+CLAUDE.md
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Local state and runtime data
+.synapse/task_state.db
+.synapse/neo4j/.venv/
+.synapse/neo4j/data/
+.synapse/neo4j/logs/
+.synapse/neo4j/import/
+.synapse/neo4j/plugins/
+
+# Docker volumes
+docker-compose.override.yml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
